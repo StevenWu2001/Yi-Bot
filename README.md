@@ -2,7 +2,7 @@
 A Discord Bot that fetches League of Legend player data from Riot API, hosted on Heroku. This bot can be used as quick way for player to check their game/rank status.
 
 ## A Quick Guide:
-Since this bot is hosted remotely on Heroku, a **.env** file is required in order for it to run locally. It needs to look something like the following:
+Since this bot is hosted remotely on Heroku, a **.env** file is required in order to run locally. It needs to look something like the following:
 ```
 BOTTOKEN = #YOUR DISCORD BOT TOKEN
 RIOTKEY = #YOUR RIOT API KEY
