@@ -37,7 +37,6 @@ module.exports = {
         
         // Champion Mastery Lookup
         if (split[2] == 'mastery') {
-            message.channel.send("Searching For Results......");
             var masteries = [];
             var names = [];
             const masteryLink = masterySearchLink + encryptedID + '?' + riotKey;
@@ -83,7 +82,6 @@ module.exports = {
                 )
             message.channel.send(masteryEmbed);
         } else if (split[2] == 'rank') { // Player Rank Lookup (Solo and Flex)
-            message.channel.send("Searching For Results......");
             const rankLink = accountInfoLink + encryptedID + '?' + riotKey;
             const accountResponse = await fetch(rankLink);
             let accountData = await accountResponse.json();
