@@ -141,6 +141,7 @@ module.exports = {
             }
             message.channel.send(rankEmbed);
         } else if (split[2] == 'playtime') {
+            message.channel.send("Searching for player match history. This might take a moment......");
             var weekTimeUnix = 604800000;
             const playTimeEmbed = new Discord.MessageEmbed();
             var currentTime = Date.now();
@@ -160,11 +161,13 @@ module.exports = {
             }
             
             var aram = 0, normal = 0, ranked = 0, others = 0;
+            var matchLink, matchResponse, matchData;
             for (var i = 0; i < matchIDs.length; i++) {
-                const matchLink = matchSearchLink + matchIDs[i] + '?' + riotKey;
-                const matchResponse = await fetch(matchLink);
-                let matchData = await matchResponse.json();
+                matchLink = matchSearchLink + matchIDs[i] + '?' + riotKey;
+                matchResponse = await fetch(matchLink);
+                matchData = await matchResponse.json();
                 totalPlayTime += matchData.gameDuration;
+                console.log(totalPlayTime);
                 if (matchData.queueId == 450) {
                     aram++;
                 } else if (matchData.queueId == 400) {
@@ -175,8 +178,8 @@ module.exports = {
                     others++;
                 }
             }
-            var hours = Math.round(totalPlayTime / 3600 * 10) / 10;
-            var mins = Math.round(totalPlayTime % 3600 % 60 * 10) / 10;
+            var hours = Math.round(totalPlayTime / 3600);
+            var mins = Math.round(totalPlayTime % 3600 % 60);
             
             playTimeEmbed.setTitle('Play Time Summary for ' + summonerName);
             playTimeEmbed.setDescription(summonerName + ' has played a total of ' 
