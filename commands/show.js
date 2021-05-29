@@ -177,8 +177,9 @@ module.exports = {
             var concurrentLimit = 3;
             for (var i = 0; i < matchIDs.length; i += concurrentLimit) {
                 partialIds = [];
-               message.channel.send(i);
+               
                 for (var j = 0; j < concurrentLimit; j++) {
+                    message.channel.send(matchIDs[i + j]);
                     if (i + j < matchIDs.length) {
                         partialIds.push(matchIDs[i + j]);
                     }
@@ -196,7 +197,7 @@ module.exports = {
                     }
                 }
                 for (var a in 1000000000) {
-                    
+
                 }
             }   
 
