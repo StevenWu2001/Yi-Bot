@@ -2,7 +2,7 @@ const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summon
 const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/';
 const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/';
 const matchHistorySearchLink = 'https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/';
-const matchSearchLink = 'https://na1.api.riotgames.com/lol/match/v4/matches/';
+const matchSearchLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/';
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOTKEY;
@@ -132,7 +132,7 @@ module.exports = {
                     var lose = accountData[1].losses;
                     var winRate = Math.round(win / (win + lose) * 1000) / 10;
                     var WRData = 'Wins: ' + win + '  Losses: ' + lose + '  ' + winRate + '% winrate';
-                    
+
                     rankEmbed.addFields(
                         { name: queueType + ':  ' + rankTier, value: WRData },
                     );
@@ -150,42 +150,41 @@ module.exports = {
             const matchHistoryLink = matchHistorySearchLink + accountID + '?' + riotKey;
             const matchHistoryResponse = await fetch(matchHistoryLink);
             let matchHistoryData = await matchHistoryResponse.json();
-            
+
             var matchIDs = [];
             for (var i = 0; i < matchHistoryData.matches.length; i++) {
                 const matchDate = matchHistoryData.matches[i].timestamp;
                 const id = matchHistoryData.matches[i].gameId;
                 if (matchDate >= (currentTime - weekTimeUnix)) {
-                    matchIDs.push(id);
+                    matchIDs.push('NA1_'+id);
                 }
             }
-            
+
             var aram = 0, normal = 0, ranked = 0, others = 0;
             var matchLink, matchResponse, matchData;
             for (var i = 0; i < matchIDs.length; i++) {
                 matchLink = matchSearchLink + matchIDs[i] + '?' + riotKey;
                 matchResponse = await fetch(matchLink);
                 matchData = await matchResponse.json();
-                totalPlayTime += matchData.gameDuration;
-                console.log(totalPlayTime);
-                if (matchData.queueId == 450) {
+                
+                totalPlayTime += matchData.info.gameDuration / 1000;
+                console.log(matchData.info.gameMode);
+                if (matchData.info.gameMode == 'ARAM') {
                     aram++;
-                } else if (matchData.queueId == 400) {
+                } else if (matchData.info.gameMode == 'CLASSIC') {
                     normal++;
-                } else if (matchData.queueId == 420 || matchData.queueId == 440) {
-                    ranked++;
                 } else {
                     others++;
                 }
             }
             var hours = Math.round(totalPlayTime / 3600);
             var mins = Math.round(totalPlayTime % 3600 % 60);
-            
+
             playTimeEmbed.setTitle('Play Time Summary for ' + summonerName);
-            playTimeEmbed.setDescription(summonerName + ' has played a total of ' 
+            playTimeEmbed.setDescription(summonerName + ' has played a total of '
                 + hours + ' hours, ' + mins + ' minutes over the past week. For a total of ' + matchIDs.length + ' games.\n\n'
-                + 'This includes: ' + normal + ' normal draft games, ' + ranked + ' ranked games, ' + aram +
-                 ' ARAM games, and ' + others + ' other games modes.');
+                + 'This includes: ' + normal + ' normal/ranked draft games, ' + aram +
+                ' ARAM games, and ' + others + ' other games modes.');
 
             message.channel.send(playTimeEmbed);
 
