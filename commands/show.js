@@ -179,7 +179,6 @@ module.exports = {
                 partialIds = [];
                
                 for (var j = 0; j < concurrentLimit; j++) {
-                    message.channel.send(matchIDs[i + j]);
                     if (i + j < matchIDs.length) {
                         partialIds.push(matchIDs[i + j]);
                     }
@@ -187,6 +186,7 @@ module.exports = {
                 
                 matchHistory = await fetchAll(partialIds);
                 for (var j = 0; j < matchHistory.length; j++) {
+                    message.channel.send(matchHistory[j].info.gameMode);
                     totalPlayTime += matchHistory[j].info.gameDuration / 1000;
                     if (matchHistory[j].info.gameMode == 'ARAM') {
                         aram++;
@@ -195,9 +195,6 @@ module.exports = {
                     } else {
                         others++;
                     }
-                }
-                for (var a in 1000000000) {
-
                 }
             }   
 
