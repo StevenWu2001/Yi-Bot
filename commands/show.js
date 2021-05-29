@@ -15,6 +15,7 @@ async function fetchAll(matchIDs) {
         var data = await Promise.all(matchIDs.map(id => fetch(id).then((response) => response.json())));
         return data;
     } catch (error) {
+        message.channel.send("Error");
         throw (error);
     }
 }
@@ -180,6 +181,7 @@ module.exports = {
                
                 for (var j = 0; j < concurrentLimit; j++) {
                     if (i + j < matchIDs.length) {
+                        message.channel.send(i + j);
                         partialIds.push(matchIDs[i + j]);
                     }
                 }
