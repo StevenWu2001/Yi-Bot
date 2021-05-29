@@ -10,7 +10,17 @@ const { DiscordAPIError } = require("discord.js");
 const fetch = require("node-fetch");
 const Discord = require('discord.js');
 
+async function fetchAll(matchIDs) {
+    try {
+        var data = await Promise.all(matchIDs.map(id => fetch(id).then((response) => response.json())));
+        return data;
+    } catch (error) {
+        throw (error);
+    }
+}
+
 module.exports = {
+    
     // show lol rank #name
     // show lol mastery #name
     // show lol playtime #name
@@ -39,7 +49,7 @@ module.exports = {
         summonerName = summonerData.name;
         summonerLevel = summonerData.summonerLevel;
         accountID = summonerData.accountId;
-        console.log(summonerData);
+        //console.log(summonerData);
 
         // Champion Mastery Lookup
         if (split[2] == 'mastery') {
@@ -145,7 +155,6 @@ module.exports = {
             var weekTimeUnix = 604800000;
             const playTimeEmbed = new Discord.MessageEmbed();
             var currentTime = Date.now();
-            var totalPlayTime = 0;
 
             const matchHistoryLink = matchHistorySearchLink + accountID + '?' + riotKey;
             const matchHistoryResponse = await fetch(matchHistoryLink);
@@ -156,27 +165,38 @@ module.exports = {
                 const matchDate = matchHistoryData.matches[i].timestamp;
                 const id = matchHistoryData.matches[i].gameId;
                 if (matchDate >= (currentTime - weekTimeUnix)) {
-                    matchIDs.push('NA1_'+id);
+                    matchIDs.push(matchSearchLink + 'NA1_' + id + '?' + riotKey);
                 }
             }
 
-            var aram = 0, normal = 0, ranked = 0, others = 0;
-            var matchLink, matchResponse, matchData;
-            for (var i = 0; i < matchIDs.length; i++) {
-                matchLink = matchSearchLink + matchIDs[i] + '?' + riotKey;
-                matchResponse = await fetch(matchLink);
-                matchData = await matchResponse.json();
-                
-                totalPlayTime += matchData.info.gameDuration / 1000;
-                console.log(matchData.info.gameMode);
-                if (matchData.info.gameMode == 'ARAM') {
-                    aram++;
-                } else if (matchData.info.gameMode == 'CLASSIC') {
-                    normal++;
-                } else {
-                    others++;
+            
+            var aram = 0, normal = 0, others = 0, totalPlayTime = 0;
+            var matchHistory = [];
+            var partialIds = [];
+            console.log(matchIDs.length);
+            var concurrentLimit = 3;
+            for (var i = 0; i < matchIDs.length; i += concurrentLimit) {
+                partialIds = [];
+                //console.log(i);
+                for (var j = 0; j < concurrentLimit; j++) {
+                    if (i + j < matchIDs.length) {
+                        partialIds.push(matchIDs[i + j]);
+                    }
                 }
-            }
+
+                matchHistory = await fetchAll(partialIds);
+                for (var j = 0; j < matchHistory.length; j++) {
+                    totalPlayTime += matchHistory[j].info.gameDuration / 1000;
+                    if (matchHistory[j].info.gameMode == 'ARAM') {
+                        aram++;
+                    } else if (matchHistory[j].info.gameMode == 'CLASSIC') {
+                        normal++;
+                    } else {
+                        others++;
+                    }
+                }
+            }   
+
             var hours = Math.round(totalPlayTime / 3600);
             var mins = Math.round(totalPlayTime % 3600 % 60);
 

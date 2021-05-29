@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ricokahler/pool": "^1.1.2",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "utf8": "^3.0.0"
