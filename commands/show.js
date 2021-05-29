@@ -177,13 +177,13 @@ module.exports = {
             var concurrentLimit = 3;
             for (var i = 0; i < matchIDs.length; i += concurrentLimit) {
                 partialIds = [];
-                //console.log(i);
+               message.channel.send(i);
                 for (var j = 0; j < concurrentLimit; j++) {
                     if (i + j < matchIDs.length) {
                         partialIds.push(matchIDs[i + j]);
                     }
                 }
-
+                
                 matchHistory = await fetchAll(partialIds);
                 for (var j = 0; j < matchHistory.length; j++) {
                     totalPlayTime += matchHistory[j].info.gameDuration / 1000;
