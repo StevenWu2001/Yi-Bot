@@ -1,8 +1,7 @@
 const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/';
 const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/';
 const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/';
-const matchHistorySearchLink = 'https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/';
-const matchSearchLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/';
+const freeRotationLink = 'https://na1.api.riotgames.com/lol/platform/v3/champion-rotations'
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOTKEY;
@@ -10,21 +9,36 @@ const { DiscordAPIError } = require("discord.js");
 const fetch = require("node-fetch");
 const Discord = require('discord.js');
 
-async function fetchAll(matchIDs) {
-    try {
-        var data = await Promise.all(matchIDs.map(id => fetch(id).then((response) => response.json())));
-        return data;
-    } catch (error) {
-        message.channel.send("Error");
-        throw (error);
-    }
+// Ranked Emblem Conversion
+const rankedEmblem = {
+    0: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Iron.png',
+    1: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Bronze.png',
+    2: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Silver.png',
+    3: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Gold.png',
+    4: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Platinum.png',
+    5: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Diamond.png',
+    6: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Master.png',
+    7: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Grandmaster.png',
+    8: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Challenger.png',
+};
+
+const rankedConvert = {
+    "IRON" : 0,
+    "BRONZE" : 1,
+    "SILVER" : 2,
+    "GOLD" : 3,
+    "PLATINUM" : 4,
+    "DIAMOND" : 5,
+    "MASTER" : 6,
+    "GRANDMASTER" : 7,
+    "CHALLENGER" : 8
 }
 
+// Command Process
 module.exports = {
-    
     // show lol rank #name
     // show lol mastery #name
-    // show lol playtime #name
+    // show lol freerotation
     name: 'show',
     description: 'A show command',
     async execute(message, args) {
@@ -33,6 +47,10 @@ module.exports = {
         var encryptedID = '';          // Summoner ID
         var accountID = '';
         var summonerLevel = '';
+
+        // Champion ID lookup table
+        const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
+        const IDTable = await IDResponse.json();
 
         for (var i = 3; i < split.length; i++) {
             summonerName += split[i] + '%20';
@@ -59,8 +77,6 @@ module.exports = {
             const masteryLink = masterySearchLink + encryptedID + '?' + riotKey;
             const masteryResponse = await fetch(masteryLink);
             let masteryData = await masteryResponse.json();
-            const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
-            const IDTable = await IDResponse.json();
 
             // Parse out mastery level, mastery points, and champion names
             for (var i = 0; i < 10; i++) {
@@ -103,7 +119,8 @@ module.exports = {
             const accountResponse = await fetch(rankLink);
             let accountData = await accountResponse.json();
             const rankEmbed = new Discord.MessageEmbed();
-
+            var highestRank = -1;
+            
             // Unranked Account
             if (accountData.length == 0) {
                 rankEmbed.setColor('#0099ff');
@@ -117,6 +134,8 @@ module.exports = {
                 } else {
                     queueType = 'Ranked Flex 5x5'
                 }
+
+                highestRank = Math.max(highestRank, rankedConvert[accountData[0].tier]);
                 var rankTier = accountData[0].tier + '  ' + accountData[0].rank + '  ' + accountData[0].leaguePoints + " LP.";
                 var win = accountData[0].wins;
                 var lose = accountData[0].losses;
@@ -129,6 +148,8 @@ module.exports = {
                 rankEmbed.addFields(
                     { name: queueType + ':  ' + rankTier, value: WRData },
                 );
+                rankEmbed.setThumbnail('https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Grandmaster.png');
+                
 
                 // Parse second ranked queue (if exist)
                 if (accountData.length == 2) {
@@ -137,7 +158,8 @@ module.exports = {
                     } else {
                         queueType = 'Ranked Flex 5x5'
                     }
-
+                    
+                    highestRank = Math.max(highestRank, rankedConvert[accountData[1].tier]);
                     var rankTier = accountData[1].tier + '  ' + accountData[1].rank + '  ' + accountData[0].leaguePoints + " LP.";
                     var win = accountData[1].wins;
                     var lose = accountData[1].losses;
@@ -150,66 +172,50 @@ module.exports = {
                 }
 
             }
+            if (highestRank != -1) {
+                rankEmbed.setThumbnail(rankedEmblem[highestRank]);
+            }
             message.channel.send(rankEmbed);
-        } else if (split[2] == 'playtime') {
-            message.channel.send("Searching for player match history. This might take a moment......");
-            var weekTimeUnix = 604800000;
-            const playTimeEmbed = new Discord.MessageEmbed();
-            var currentTime = Date.now();
+        } else if (split[2] == 'freerotation') {
+            freeChamps = [];
+            freeChampsStr = '';
+            freeChampsForNew = [];
+            freeChampsForNewStr = '';
 
-            const matchHistoryLink = matchHistorySearchLink + accountID + '?' + riotKey;
-            const matchHistoryResponse = await fetch(matchHistoryLink);
-            let matchHistoryData = await matchHistoryResponse.json();
+            freeRotationEmbed = new Discord.MessageEmbed();
+            freeRotationEmbed.setColor("#0099ff");
+            freeRotationEmbed.setTitle("This Week's Champion Free Rotation:");
 
-            var matchIDs = [];
-            for (var i = 0; i < matchHistoryData.matches.length; i++) {
-                const matchDate = matchHistoryData.matches[i].timestamp;
-                const id = matchHistoryData.matches[i].gameId;
-                if (matchDate >= (currentTime - weekTimeUnix)) {
-                    matchIDs.push(matchSearchLink + 'NA1_' + id + '?' + riotKey);
+            const freeChampLink = freeRotationLink+ '?' + riotKey;
+            const freeChampResponse = await fetch(freeChampLink);
+            let champ = await freeChampResponse.json();
+            
+            freeChamps = champ.freeChampionIds;
+            freeChampsForNew = champ.freeChampionIdsForNewPlayers;
+
+            var i = 1;
+            for (const id in freeChamps) {
+                for (const key in IDTable.data) {
+                    if (IDTable.data[key].key == freeChamps[id]) {
+                        freeChampsStr += i++ + ': ' + IDTable.data[key].id + '\n';
+                    }
+                }
+            }
+            i = 1;
+            for (const id in freeChampsForNew) {
+                for (const key in IDTable.data) {
+                    if (IDTable.data[key].key == freeChampsForNew[id]) {
+                        freeChampsForNewStr += i++ + ': ' + IDTable.data[key].id + '\n';
+                    }
                 }
             }
 
-            
-            var aram = 0, normal = 0, others = 0, totalPlayTime = 0;
-            var matchHistory = [];
-            var partialIds = [];
-            console.log(matchIDs.length);
-            var concurrentLimit = 3;
-            for (var i = 0; i < matchIDs.length; i += concurrentLimit) {
-                partialIds = [];
-               
-                for (var j = 0; j < concurrentLimit; j++) {
-                    if (i + j < matchIDs.length) {
-                        message.channel.send(i + j);
-                        partialIds.push(matchIDs[i + j]);
-                    }
-                }
-                
-                matchHistory = await fetchAll(partialIds);
-                for (var j = 0; j < matchHistory.length; j++) {
-                    message.channel.send(matchHistory[j].info.gameMode);
-                    totalPlayTime += matchHistory[j].info.gameDuration / 1000;
-                    if (matchHistory[j].info.gameMode == 'ARAM') {
-                        aram++;
-                    } else if (matchHistory[j].info.gameMode == 'CLASSIC') {
-                        normal++;
-                    } else {
-                        others++;
-                    }
-                }
-            }   
+            freeRotationEmbed.addFields(
+                {name : 'Free Champions: ', value : freeChampsStr, inline : true},
+                {name : 'Free Rotation For Players Under lv 10: ', value : freeChampsForNewStr, inline : true}
+            );
 
-            var hours = Math.round(totalPlayTime / 3600);
-            var mins = Math.round(totalPlayTime % 3600 % 60);
-
-            playTimeEmbed.setTitle('Play Time Summary for ' + summonerName);
-            playTimeEmbed.setDescription(summonerName + ' has played a total of '
-                + hours + ' hours, ' + mins + ' minutes over the past week. For a total of ' + matchIDs.length + ' games.\n\n'
-                + 'This includes: ' + normal + ' normal/ranked draft games, ' + aram +
-                ' ARAM games, and ' + others + ' other games modes.');
-
-            message.channel.send(playTimeEmbed);
+            message.channel.send(freeRotationEmbed);
 
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
