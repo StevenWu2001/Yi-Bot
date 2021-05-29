@@ -1,6 +1,8 @@
 const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/';
 const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/';
 const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/';
+const matchHistorySearchLink = 'https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/';
+const matchSearchLink = 'https://na1.api.riotgames.com/lol/match/v4/matches/';
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOTKEY;
@@ -11,12 +13,14 @@ const Discord = require('discord.js');
 module.exports = {
     // show lol rank #name
     // show lol mastery #name
+    // show lol playtime #name
     name: 'show',
     description: 'A show command',
     async execute(message, args) {
         var split = message.content.split(' ')
         var summonerName = '';
         var encryptedID = '';          // Summoner ID
+        var accountID = '';
         var summonerLevel = '';
 
         for (var i = 3; i < split.length; i++) {
@@ -34,7 +38,9 @@ module.exports = {
         encryptedID = summonerData.id;
         summonerName = summonerData.name;
         summonerLevel = summonerData.summonerLevel;
-        
+        accountID = summonerData.accountId;
+        console.log(summonerData);
+
         // Champion Mastery Lookup
         if (split[2] == 'mastery') {
             var masteries = [];
@@ -86,7 +92,7 @@ module.exports = {
             const accountResponse = await fetch(rankLink);
             let accountData = await accountResponse.json();
             const rankEmbed = new Discord.MessageEmbed();
-            
+
             // Unranked Account
             if (accountData.length == 0) {
                 rankEmbed.setColor('#0099ff');
@@ -105,7 +111,7 @@ module.exports = {
                 var lose = accountData[0].losses;
                 var winRate = Math.round(win / (win + lose) * 1000) / 10;
                 var WRData = 'Wins: ' + win + '  Losses: ' + lose + '  ' + winRate + '% winrate';
-                console.log(win + ' ' + lose + ' ' + winRate);
+
                 rankEmbed.setColor('#0099ff');
                 rankEmbed.setTitle('Rank Summary for ' + summonerName);
                 rankEmbed.setDescription('Summoner Level: ' + summonerLevel);
@@ -120,11 +126,13 @@ module.exports = {
                     } else {
                         queueType = 'Ranked Flex 5x5'
                     }
+
                     var rankTier = accountData[1].tier + '  ' + accountData[1].rank + '  ' + accountData[0].leaguePoints + " LP.";
                     var win = accountData[1].wins;
                     var lose = accountData[1].losses;
                     var winRate = Math.round(win / (win + lose) * 1000) / 10;
                     var WRData = 'Wins: ' + win + '  Losses: ' + lose + '  ' + winRate + '% winrate';
+                    
                     rankEmbed.addFields(
                         { name: queueType + ':  ' + rankTier, value: WRData },
                     );
@@ -132,6 +140,52 @@ module.exports = {
 
             }
             message.channel.send(rankEmbed);
+        } else if (split[2] == 'playtime') {
+            var weekTimeUnix = 604800000;
+            const playTimeEmbed = new Discord.MessageEmbed();
+            var currentTime = Date.now();
+            var totalPlayTime = 0;
+
+            const matchHistoryLink = matchHistorySearchLink + accountID + '?' + riotKey;
+            const matchHistoryResponse = await fetch(matchHistoryLink);
+            let matchHistoryData = await matchHistoryResponse.json();
+            
+            var matchIDs = [];
+            for (var i = 0; i < matchHistoryData.matches.length; i++) {
+                const matchDate = matchHistoryData.matches[i].timestamp;
+                const id = matchHistoryData.matches[i].gameId;
+                if (matchDate >= (currentTime - weekTimeUnix)) {
+                    matchIDs.push(id);
+                }
+            }
+            
+            var aram = 0, normal = 0, ranked = 0, others = 0;
+            for (var i = 0; i < matchIDs.length; i++) {
+                const matchLink = matchSearchLink + matchIDs[i] + '?' + riotKey;
+                const matchResponse = await fetch(matchLink);
+                let matchData = await matchResponse.json();
+                totalPlayTime += matchData.gameDuration;
+                if (matchData.queueId == 450) {
+                    aram++;
+                } else if (matchData.queueId == 400) {
+                    normal++;
+                } else if (matchData.queueId == 420 || matchData.queueId == 440) {
+                    ranked++;
+                } else {
+                    others++;
+                }
+            }
+            var hours = Math.round(totalPlayTime / 3600 * 10) / 10;
+            var mins = Math.round(totalPlayTime % 3600 % 60 * 10) / 10;
+            
+            playTimeEmbed.setTitle('Play Time Summary for ' + summonerName);
+            playTimeEmbed.setDescription(summonerName + ' has played a total of ' 
+                + hours + ' hours, ' + mins + ' minutes over the past week. For a total of ' + matchIDs.length + ' games.\n\n'
+                + 'This includes: ' + normal + ' normal draft games, ' + ranked + ' ranked games, ' + aram +
+                 ' ARAM games, and ' + others + ' other games modes.');
+
+            message.channel.send(playTimeEmbed);
+
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
