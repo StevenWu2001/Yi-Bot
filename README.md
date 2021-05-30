@@ -15,13 +15,13 @@ You will need to create your own Discord bot from Discord's developer portal and
 
 ## Overview
 ### The bot supports the following commands: ```!guide```<br/>
-``` !show lol rank #playerName ``` <br/><br/>
+``` !show lol rank #playerName ``` <br/>
 Displays the current ranked status of the given summoner. <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank1.png" width = "300">
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank2.png" width = "306"> <br/><br/><br/>
-``` !show lol mastery #playerName ``` <br/><br/>
+``` !show lol mastery #playerName ``` <br/>
 Displays the top 10 highest mastery points champions of the given summoner (In descending order). <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/mastery1.png" width = "300"> <br/><br/><br/>
-``` !show lol freerotation ``` <br/><br/>
+``` !show lol freerotation ``` <br/>
 Displays the current week's free rotation champions, including free rotations for players under level 10 <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
