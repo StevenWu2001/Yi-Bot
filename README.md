@@ -14,7 +14,7 @@ RIOTKEY = #YOUR RIOT API KEY
 You will need to create your own Discord bot from Discord's developer portal and copy the bot token there. The Riot API key can be obtained from Riot's API website. 
 
 ## Overview
-### The bot supports the following commands: <br/>
+### The bot supports the following commands: ```!guide```<br/>
 ``` !show lol rank #playerName ``` <br/><br/>
 Displays the current ranked status of the given summoner. <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank1.png" width = "300">
