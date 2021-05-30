@@ -34,6 +34,18 @@ const rankedConvert = {
     "CHALLENGER" : 8
 }
 
+const numsToRank = {
+    0 : "IRON",
+    1 : "BRONZE",
+    2 : "SILVER",
+    3 : "GOLD",
+    4 : "PLATINUM",
+    5 :  "DIAMOND",
+    6 : "MASTER",
+    7 : "GRANDMASTER",
+    8 : "CHALLENGER"
+}
+
 // Command Process
 module.exports = {
     // show lol rank #name
@@ -99,19 +111,19 @@ module.exports = {
 
             const masteryEmbed = new Discord.MessageEmbed()
                 .setColor('#0099ff')
-                .setTitle('Summoner Champion Mastery Summary for ' + summonerName)
+                .setTitle('Summoner Champion Mastery Summary for `' + summonerName + '`')
                 .setDescription('Top 10 Highest Mastery Champions')
                 .addFields(
-                    { name: '1: ' + names[0], value: masteries[0] },
-                    { name: '2: ' + names[1], value: masteries[1] },
-                    { name: '3: ' + names[2], value: masteries[2] },
-                    { name: '4: ' + names[3], value: masteries[3] },
-                    { name: '5: ' + names[4], value: masteries[4] },
-                    { name: '6: ' + names[5], value: masteries[5] },
-                    { name: '7: ' + names[6], value: masteries[6] },
-                    { name: '8: ' + names[7], value: masteries[7] },
-                    { name: '9: ' + names[8], value: masteries[8] },
-                    { name: '10:  ' + names[9], value: masteries[9] },
+                    { name: '1: `' + names[0] + '`', value: masteries[0] },
+                    { name: '2: `' + names[1] + '`', value: masteries[1] },
+                    { name: '3: `' + names[2] + '`', value: masteries[2] },
+                    { name: '4: `' + names[3] + '`', value: masteries[3] },
+                    { name: '5: `' + names[4] + '`', value: masteries[4] },
+                    { name: '6: `' + names[5] + '`', value: masteries[5] },
+                    { name: '7: `' + names[6] + '`', value: masteries[6] },
+                    { name: '8: `' + names[7] + '`', value: masteries[7] },
+                    { name: '9: `' + names[8] + '`', value: masteries[8] },
+                    { name: '10:  `' + names[9] + '`', value: masteries[9] },
                 )
             message.channel.send(masteryEmbed);
         } else if (split[2] == 'rank') { // Player Rank Lookup (Solo and Flex)
@@ -140,16 +152,33 @@ module.exports = {
                 var win = accountData[0].wins;
                 var lose = accountData[0].losses;
                 var winRate = Math.round(win / (win + lose) * 1000) / 10;
-                var WRData = 'Wins: ' + win + '  Losses: ' + lose + '  ' + winRate + '% winrate';
+                var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  Winrate: `' + winRate + '%`';
 
                 rankEmbed.setColor('#0099ff');
-                rankEmbed.setTitle('Rank Summary for ' + summonerName);
-                rankEmbed.setDescription('Summoner Level: ' + summonerLevel);
+                rankEmbed.setTitle('Rank Summary for `' + summonerName + '`');
+                rankEmbed.setDescription('Summoner Level: `' + summonerLevel + '`');
                 rankEmbed.addFields(
-                    { name: queueType + ':  ' + rankTier, value: WRData },
+                    { name: queueType + ': ' + rankTier, value: WRData},
                 );
                 rankEmbed.setThumbnail('https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Grandmaster.png');
                 
+                // Check Ranked Promotion Series
+                if (accountData[0].hasOwnProperty('miniSeries')) {
+                    var progress = accountData[0].miniSeries.progress;
+                    var progressStr = '';
+                    var nextRank = numsToRank[rankedConvert[accountData[0].tier] + 1];
+                    for (var c in progress) {
+                        if (progress[c] == 'L') {
+                            progressStr += ':x:   ';
+                        } else if (progress[c] == 'W') { 
+                            progressStr += ':o:   ';
+                        } else {
+                            progressStr += ':question:   ';
+                        }
+                    }
+                    
+                    rankEmbed.addField('``' + summonerName + ' is on his promotion to ' + nextRank + '`` ', progressStr);
+                }
 
                 // Parse second ranked queue (if exist)
                 if (accountData.length == 2) {
@@ -164,7 +193,7 @@ module.exports = {
                     var win = accountData[1].wins;
                     var lose = accountData[1].losses;
                     var winRate = Math.round(win / (win + lose) * 1000) / 10;
-                    var WRData = 'Wins: ' + win + '  Losses: ' + lose + '  ' + winRate + '% winrate';
+                    var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  ' + 'Winrate: `' +  winRate + '%`';
 
                     rankEmbed.addFields(
                         { name: queueType + ':  ' + rankTier, value: WRData },
