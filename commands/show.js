@@ -23,27 +23,27 @@ const rankedEmblem = {
 };
 
 const rankedConvert = {
-    "IRON" : 0,
-    "BRONZE" : 1,
-    "SILVER" : 2,
-    "GOLD" : 3,
-    "PLATINUM" : 4,
-    "DIAMOND" : 5,
-    "MASTER" : 6,
-    "GRANDMASTER" : 7,
-    "CHALLENGER" : 8
+    "IRON": 0,
+    "BRONZE": 1,
+    "SILVER": 2,
+    "GOLD": 3,
+    "PLATINUM": 4,
+    "DIAMOND": 5,
+    "MASTER": 6,
+    "GRANDMASTER": 7,
+    "CHALLENGER": 8
 }
 
 const numsToRank = {
-    0 : "IRON",
-    1 : "BRONZE",
-    2 : "SILVER",
-    3 : "GOLD",
-    4 : "PLATINUM",
-    5 :  "DIAMOND",
-    6 : "MASTER",
-    7 : "GRANDMASTER",
-    8 : "CHALLENGER"
+    0: "IRON",
+    1: "BRONZE",
+    2: "SILVER",
+    3: "GOLD",
+    4: "PLATINUM",
+    5: "DIAMOND",
+    6: "MASTER",
+    7: "GRANDMASTER",
+    8: "CHALLENGER"
 }
 
 // Command Process
@@ -132,7 +132,7 @@ module.exports = {
             let accountData = await accountResponse.json();
             const rankEmbed = new Discord.MessageEmbed();
             var highestRank = -1;
-            
+
             // Unranked Account
             if (accountData.length == 0) {
                 rankEmbed.setColor('#0099ff');
@@ -158,10 +158,10 @@ module.exports = {
                 rankEmbed.setTitle('Rank Summary for `' + summonerName + '`');
                 rankEmbed.setDescription('Summoner Level: `' + summonerLevel + '`');
                 rankEmbed.addFields(
-                    { name: queueType + ': ' + rankTier, value: WRData},
+                    { name: queueType + ': ' + rankTier, value: WRData },
                 );
                 rankEmbed.setThumbnail('https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Grandmaster.png');
-                
+
                 // Check Ranked Promotion Series
                 if (accountData[0].hasOwnProperty('miniSeries')) {
                     var progress = accountData[0].miniSeries.progress;
@@ -170,13 +170,13 @@ module.exports = {
                     for (var c in progress) {
                         if (progress[c] == 'L') {
                             progressStr += ':x:   ';
-                        } else if (progress[c] == 'W') { 
+                        } else if (progress[c] == 'W') {
                             progressStr += ':o:   ';
                         } else {
                             progressStr += ':question:   ';
                         }
                     }
-                    
+
                     rankEmbed.addField('``' + summonerName + ' is on his promotion to ' + nextRank + '`` ', progressStr);
                 }
 
@@ -187,17 +187,35 @@ module.exports = {
                     } else {
                         queueType = 'Ranked Flex 5x5'
                     }
-                    
+
                     highestRank = Math.max(highestRank, rankedConvert[accountData[1].tier]);
-                    var rankTier = accountData[1].tier + '  ' + accountData[1].rank + '  ' + accountData[0].leaguePoints + " LP.";
+                    var rankTier = accountData[1].tier + '  ' + accountData[1].rank + '  ' + accountData[1].leaguePoints + " LP.";
                     var win = accountData[1].wins;
                     var lose = accountData[1].losses;
                     var winRate = Math.round(win / (win + lose) * 1000) / 10;
-                    var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  ' + 'Winrate: `' +  winRate + '%`';
+                    var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  ' + 'Winrate: `' + winRate + '%`';
 
                     rankEmbed.addFields(
                         { name: queueType + ':  ' + rankTier, value: WRData },
                     );
+
+                    // Check Ranked Promotion Series
+                    if (accountData[1].hasOwnProperty('miniSeries')) {
+                        var progress = accountData[1].miniSeries.progress;
+                        var progressStr = '';
+                        var nextRank = numsToRank[rankedConvert[accountData[1].tier] + 1];
+                        for (var c in progress) {
+                            if (progress[c] == 'L') {
+                                progressStr += ':x:   ';
+                            } else if (progress[c] == 'W') {
+                                progressStr += ':o:   ';
+                            } else {
+                                progressStr += ':question:   ';
+                            }
+                        }
+
+                        rankEmbed.addField('``' + summonerName + ' is on his promotion to ' + nextRank + '`` ', progressStr);
+                    }
                 }
 
             }
@@ -215,10 +233,10 @@ module.exports = {
             freeRotationEmbed.setColor("#0099ff");
             freeRotationEmbed.setTitle("This Week's Champion Free Rotation:");
 
-            const freeChampLink = freeRotationLink+ '?' + riotKey;
+            const freeChampLink = freeRotationLink + '?' + riotKey;
             const freeChampResponse = await fetch(freeChampLink);
             let champ = await freeChampResponse.json();
-            
+
             freeChamps = champ.freeChampionIds;
             freeChampsForNew = champ.freeChampionIdsForNewPlayers;
 
@@ -240,8 +258,8 @@ module.exports = {
             }
 
             freeRotationEmbed.addFields(
-                {name : 'Free Champions: ', value : freeChampsStr, inline : true},
-                {name : 'Free Rotation For Players Under lv 10: ', value : freeChampsForNewStr, inline : true}
+                { name: 'Free Champions: ', value: freeChampsStr, inline: true },
+                { name: 'Free Rotation For Players Under lv 10: ', value: freeChampsForNewStr, inline: true }
             );
 
             message.channel.send(freeRotationEmbed);
