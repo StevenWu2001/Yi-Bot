@@ -10,6 +10,10 @@ A **.env** file is required in order to run the bot locally. It needs to look li
 BOTTOKEN = #YOUR DISCORD BOT TOKEN
 RIOTKEY = #YOUR RIOT API KEY
 ```
+After adding the bot to the server, it can be launched with:
+```
+node index.js
+```
 
 ## Overview
 ### The bot supports the following commands: ```!guide```<br/>
