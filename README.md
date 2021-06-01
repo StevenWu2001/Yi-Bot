@@ -5,7 +5,7 @@ A Discord Bot that fetches League of Legend player data from Riot API, hosted on
  - [Discord.js](https://discord.js.org/#/) <br/>
 
 ## A Quick Guide
-Since this bot is hosted remotely on Heroku, a **.env** file is required in order to run it locally. It needs to look like the following:
+A **.env** file is required in order to run it locally. It needs to look like the following:
 ```
 BOTTOKEN = #YOUR DISCORD BOT TOKEN
 RIOTKEY = #YOUR RIOT API KEY
