@@ -1,6 +1,6 @@
 
 const profileLink = "https://api.mozambiquehe.re/bridge?version=5&platform=PC";
-const apexKey = process.env.APEXKey;
+const apexKey = process.env.APEXKEY;
 
 const Discord = require('discord.js');
 const utf8 = require('utf8');
