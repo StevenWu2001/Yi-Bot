@@ -51,7 +51,7 @@ module.exports = {
     // show lol rank #name
     // show lol mastery #name
     // show lol freerotation
-    name: 'show',
+    name: 'lol',
     description: 'A show command',
     async execute(message, args) {
         var split = message.content.split(' ')
@@ -64,7 +64,7 @@ module.exports = {
         const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
         const IDTable = await IDResponse.json();
 
-        for (var i = 3; i < split.length; i++) {
+        for (var i = 2; i < split.length; i++) {
             summonerName += split[i] + '%20';
         }
         summonerName = utf8.encode(summonerName);
@@ -83,7 +83,7 @@ module.exports = {
         //console.log(summonerData);
 
         // Champion Mastery Lookup
-        if (split[2] == 'mastery') {
+        if (split[1] == 'mastery') {
             var masteries = [];
             var names = [];
             const masteryLink = masterySearchLink + encryptedID + '?' + riotKey;
@@ -126,10 +126,11 @@ module.exports = {
                     { name: '10:  `' + names[9] + '`', value: masteries[9] },
                 )
             message.channel.send(masteryEmbed);
-        } else if (split[2] == 'rank') { // Player Rank Lookup (Solo and Flex)
+        } else if (split[1] == 'rank') { // Player Rank Lookup (Solo and Flex)
             const rankLink = accountInfoLink + encryptedID + '?' + riotKey;
             const accountResponse = await fetch(rankLink);
             let accountData = await accountResponse.json();
+            console.log(accountData);
             const rankEmbed = new Discord.MessageEmbed();
             var highestRank = -1;
 
@@ -137,7 +138,7 @@ module.exports = {
             if (accountData.length == 0) {
                 rankEmbed.setColor('#0099ff');
                 rankEmbed.setTitle('Rank Summary for ' + summonerName);
-                rankEmbed.setDescription('Summoner Level: ' + summonerLevel + '\nThis Player is Currently Unranked');
+                rankEmbed.setDescription('Summoner Level: `' + summonerLevel + '`\nThis Player is Currently Unranked');
             } else {
                 // Parse first ranked queue
                 var queueType = '';
@@ -223,7 +224,7 @@ module.exports = {
                 rankEmbed.setThumbnail(rankedEmblem[highestRank]);
             }
             message.channel.send(rankEmbed);
-        } else if (split[2] == 'freerotation') {
+        } else if (split[1] == 'freerotation') {
             freeChamps = [];
             freeChampsStr = '';
             freeChampsForNew = [];
