@@ -8,7 +8,8 @@ module.exports = {
 	execute(message, args) {
         var lolCmd = "1: Champion Mastery :bulb:\n `!lol mastery SUMMONER_NAME`\n\n";
         lolCmd += "2: Rank Info :brain:\n `!lol rank SUMMONER_NAME`\n\n";
-        lolCmd += "3: Weekly Free Rotation :watch:\n `!lol freerotation`\n\n";
+        lolCmd += "3: Weekly Free Rotation :free:\n `!lol freerotation`\n\n";
+        lolCmd += "4: Recent Match History :watch:\n `!lol match SUMMONER_NAME NUMBER_OF_MATCHES (optional, default 5, max 20)`"
 
         var apex = "1: Player Stats :bulb:\n`!apex player ORIGIN_USERNAME`\n\n";
 

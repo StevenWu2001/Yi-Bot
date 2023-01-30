@@ -2,12 +2,22 @@ const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summon
 const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/';
 const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/';
 const freeRotationLink = 'https://na1.api.riotgames.com/lol/platform/v3/champion-rotations'
+const matchHistoryLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/'
+const matchLookupLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/'
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOTKEY;
 const { DiscordAPIError } = require("discord.js");
 const fetch = require("node-fetch");
 const Discord = require('discord.js');
+const { AttachmentBuilder, EmbedBuilder, Client } = require('discord.js');
+
+// Initialize Client
+const client = new Discord.Client();
+var emojiList = []
+client
+.on('ready', () =>emojiList = client.emojis)
+.login(process.env.BOTTOKEN);
 
 // Ranked Emblem Conversion
 const rankedEmblem = {
@@ -46,11 +56,27 @@ const numsToRank = {
     8: "CHALLENGER"
 }
 
+// Convert from queue ID to match type
+const queueIDConvert = {
+    400: "Draft",
+    420: "Ranked Solo/Duo",
+    430: "Blind",
+    440: "Ranked Flex",
+    450: "ARAM",
+    830: "Intro Bot",
+    840: "Beginner Bot",
+    850: "Intermediate Bot",
+    900: "URF",
+    1010: "URF",
+    1900: "URF"
+}
+
 // Command Process
 module.exports = {
     // show lol rank #name
     // show lol mastery #name
     // show lol freerotation
+    // show lol match #name
     name: 'lol',
     description: 'A show command',
     async execute(message, args) {
@@ -59,10 +85,19 @@ module.exports = {
         var encryptedID = '';          // Summoner ID
         var accountID = '';
         var summonerLevel = '';
+        var puuid = '';
+        var iconID = '';
+        var numOfMatch = 5;
+        
+        if (!isNaN(split[split.length - 1])) {
+            numOfMatch = parseInt(split[split.length - 1])
+            split.pop()
+        }
 
         // Champion ID lookup table
         const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
         const IDTable = await IDResponse.json();
+        
 
         for (var i = 2; i < split.length; i++) {
             summonerName += split[i] + '%20';
@@ -80,7 +115,9 @@ module.exports = {
         summonerName = summonerData.name;
         summonerLevel = summonerData.summonerLevel;
         accountID = summonerData.accountId;
-        //console.log(summonerData);
+        puuid = summonerData.puuid
+        iconID = summonerData.profileIconId;
+
 
         // Champion Mastery Lookup
         if (split[1] == 'mastery') {
@@ -223,6 +260,7 @@ module.exports = {
             if (highestRank != -1) {
                 rankEmbed.setThumbnail(rankedEmblem[highestRank]);
             }
+
             message.channel.send(rankEmbed);
         } else if (split[1] == 'freerotation') {
             freeChamps = [];
@@ -265,6 +303,84 @@ module.exports = {
 
             message.channel.send(freeRotationEmbed);
 
+        } else if (split[1] == 'match') {
+            message.channel.send("Fetching match history... (more matches will take more time)")
+            // W or L
+            // Champ played
+            // Type of game
+            matchEmbed = new Discord.MessageEmbed();
+            matchEmbed.setColor("#0099ff");
+            
+            console.log(split)
+            const link = matchHistoryLink + puuid + '/ids?start=0&count=' + numOfMatch + '&' + riotKey;
+            const response = await fetch(link);
+            let matchidList = await response.json();
+
+            var totalDeaths = 0;
+            var totalKills = 0;
+            var totalAssists = 0;
+            var totalWins = 0;
+            var totalLosses = 0;
+
+            console.log(matchidList)
+            for (const matchid in matchidList) {
+                
+                // Match Info
+                var win = false;
+                var champPlayed = "";
+                var champId = "";
+                var gameType = "";
+                var kill = 0;
+                var death = 0;
+                var assist = 0;
+                var kda = ""
+
+                var matchlink = matchLookupLink + matchidList[matchid] + '?' + riotKey;
+                const matchResponse = await fetch(matchlink);
+                let matchData = await matchResponse.json();
+                gameType = queueIDConvert[matchData['info']['queueId']];
+                if (gameType == null) {
+                    gameType = 'Other';
+                }
+
+                for (const i in matchData['info']['participants']) {
+                    if (matchData['info']['participants'][i]['puuid'] == puuid) {
+                        const data = matchData['info']['participants'][i];
+                        win = data['win'];
+                        champPlayed = data['championName'];
+                        champId = data['championId'];
+                        kill = data['kills'];
+                        death = data['deaths'];
+                        assist = data['assists'];
+                        kda = kill + '/' + death + '/' + assist;
+                        totalKills += kill;
+                        totalDeaths += death;
+                        totalAssists += assist;
+                        
+                        if (win) {
+                            totalWins++;
+                        } else {
+                            totalLosses++;
+                        }
+
+                        break;
+                    }
+                }
+
+                champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + kda + '`' + '\ ' + champPlayed + champIcon + "\u1CBC\u1CBC" + gameType;
+                matchEmbed.addFields(
+                    {name: 'Match ' + (parseInt(matchid) + 1) + ': ', value: matchSummary},
+                );
+            }
+            
+            var avgKda = Math.round(((totalKills + totalAssists) / totalDeaths) * 100) / 100;
+            var winrate = Math.round(totalWins / (totalWins + totalLosses) * 100) / 100;
+            matchEmbed.setThumbnail('http://ddragon.leagueoflegends.com/cdn/13.1.1/img/profileicon/' + iconID + '.png');
+            matchEmbed.setTitle('Recent ' + (totalWins + totalLosses) + ' Match(es) for ```' + summonerName + '```');
+            matchEmbed.setDescription('Average KDA: `' + avgKda + '`\u1CBCWinrate: `' + winrate + '`')
+
+            message.channel.send(matchEmbed);
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
