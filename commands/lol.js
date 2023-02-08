@@ -16,7 +16,11 @@ const { AttachmentBuilder, EmbedBuilder, Client } = require('discord.js');
 const client = new Discord.Client();
 var emojiList = []
 client
-.on('ready', () =>emojiList = client.emojis)
+.on('ready', () =>{
+    emojiList = client.emojis
+    client.user.setActivity("Master Yi", {type: "PLAYING"})
+}
+)
 .login(process.env.BOTTOKEN);
 
 // Ranked Emblem Conversion
@@ -368,9 +372,9 @@ module.exports = {
                 }
 
                 champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
-                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + kda + '`' + '\ ' + champPlayed + champIcon + "\u1CBC\u1CBC" + gameType;
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + kda + '`' + '\ ' + champPlayed + champIcon;
                 matchEmbed.addFields(
-                    {name: 'Match ' + (parseInt(matchid) + 1) + ': ', value: matchSummary},
+                    {name: (parseInt(matchid) + 1) + ". " + gameType + ': ', value: matchSummary},
                 );
             }
             
