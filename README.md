@@ -1,4 +1,4 @@
-# Discord-Bot-for-LOL
+# Yi Bot for LOL
 A Discord Bot that fetches League of Legend player data from Riot API, hosted on [Heroku](https://dashboard.heroku.com/apps). It can be used as a quick way for players to check their game/rank status. This bot is programmed using node.js along with the powerfull module discord.js. <br/>
  - [Discord Developer Portal](https://discord.com/developers/docs/intro) <br/>
  - [Riot's API](https://developer.riotgames.com) <br/>
