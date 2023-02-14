@@ -62,9 +62,9 @@ const numsToRank = {
 
 // Convert from queue ID to match type
 const queueIDConvert = {
-    400: "Draft",
+    400: "Draft Pick",
     420: "Ranked Solo/Duo",
-    430: "Blind",
+    430: "Blind Pick",
     440: "Ranked Flex",
     450: "ARAM",
     830: "Intro Bot",
@@ -73,6 +73,14 @@ const queueIDConvert = {
     900: "URF",
     1010: "URF",
     1900: "URF"
+}
+
+const positionConvert = {
+    'TOP': 'Top',
+    'MIDDLE': 'Mid',
+    'JUNGLE': 'Jungle',
+    'BOTTOM': 'Bot',
+    'SUPPORT': 'Sup'
 }
 
 // Command Process
@@ -337,14 +345,41 @@ module.exports = {
                 var kill = 0;
                 var death = 0;
                 var assist = 0;
-                var kda = ""
+                var kda = "";
+                var position = "";
+                var gameDuration = "";
+
+                // An individual report based on position the player played
+                let individualReport = "";
 
                 var matchlink = matchLookupLink + matchidList[matchid] + '?' + riotKey;
                 const matchResponse = await fetch(matchlink);
                 let matchData = await matchResponse.json();
+                
                 gameType = queueIDConvert[matchData['info']['queueId']];
                 if (gameType == null) {
                     gameType = 'Other';
+                }
+
+                let durationSec = matchData['info']['gameDuration']
+                let hours = Math.floor(durationSec / 3600);
+                durationSec %= 3600
+                let minutes = Math.floor(durationSec / 60);
+                let seconds = durationSec % 60;
+                
+                
+                if (hours != 0) {
+                    gameDuration += hours + ":";
+                }
+                if (minutes != 0) {
+                    gameDuration += minutes + ':';
+                } else {
+                    gameDuration += '00:';
+                }
+                if (seconds != 0) {
+                    gameDuration += seconds;
+                } else {
+                    gameDuration += '00';
                 }
 
                 for (const i in matchData['info']['participants']) {
@@ -356,6 +391,8 @@ module.exports = {
                         kill = data['kills'];
                         death = data['deaths'];
                         assist = data['assists'];
+                        position = data['teamPosition']
+
                         kda = kill + '/' + death + '/' + assist;
                         totalKills += kill;
                         totalDeaths += death;
@@ -367,14 +404,30 @@ module.exports = {
                             totalLosses++;
                         }
 
+                        if (position == 'TOP') {
+
+                        } else if (position == 'JUNGLE') {
+                            
+                        } else if (position == 'MIDDLE') {
+
+                        } else if (position == 'BOTTOM') {
+
+                        } else if (position == 'SUPPORT') {
+
+                        }
+
                         break;
                     }
                 }
 
+                if (position in positionConvert) {
+                    position = '(' + positionConvert[position] + ')';
+                }
+
                 champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
-                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + kda + '`' + '\ ' + champPlayed + champIcon;
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '`' + '\ ' + champPlayed + champIcon;
                 matchEmbed.addFields(
-                    {name: (parseInt(matchid) + 1) + ". " + gameType + ': ', value: matchSummary},
+                    {name: (parseInt(matchid) + 1) + '.\u1CBC' + gameType + '\u1CBC' + position, value: matchSummary + '\n' + individualReport},
                 );
             }
             
