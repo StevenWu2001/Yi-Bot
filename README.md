@@ -7,8 +7,8 @@ A Discord Bot that fetches League of Legend player data from Riot API, hosted on
 ## A Quick Guide
 A **.env** file is required in order to run the bot locally. It needs to look like the following:
 ```
-BOTTOKEN = #YOUR DISCORD BOT TOKEN
-RIOTKEY = #YOUR RIOT API KEY
+BOT_TOKEN = #YOUR DISCORD BOT TOKEN
+RIOT_KEY = #YOUR RIOT API KEY
 OPENAI_API_KEY = #YOUR OPENAI API KEY
 ```
 After adding the bot to the server, it can be launched with:
@@ -18,20 +18,20 @@ node index.js
 
 ## Overview
 ### The bot supports the following commands: Type ```!guide``` for more details<br/>
-``` !show lol rank #playerName ``` <br/>
+``` !lol rank #playerName ``` <br/>
 Displays the current ranked status of the given summoner. <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank1.png" width = "300">
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank2.png" width = "306"> <br/><br/>
 ``` !lol match SUMMONER_NAME NUMBER_OF_MATCHES (optional, default 5, max 20) ``` <br/>
 Displays the recent match history (up to 20) <br/><br/>
 <img src="https://github.com/StevenWu2001/Yi-Bot/blob/main/img/demo/match1.png" width = "300"> <br/><br/>
-``` !show lol mastery #playerName ``` <br/>
+``` !lol mastery #playerName ``` <br/>
 Displays the top 10 highest mastery points champions of the given summoner (In descending order). <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/mastery1.png" width = "300"> <br/><br/>
-``` !show lol freerotation ``` <br/>
+``` !lol freerotation ``` <br/>
 Displays the current week's free rotation champions, including free rotations for players under level 10 <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
 
-``` !show lol freerotation ``` <br/>
+``` !lol freerotation ``` <br/>
 Displays the current week's free rotation champions, including free rotations for players under level 10 <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
