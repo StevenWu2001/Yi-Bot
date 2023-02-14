@@ -6,7 +6,7 @@ const matchHistoryLink = 'https://americas.api.riotgames.com/lol/match/v5/matche
 const matchLookupLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/'
 
 const utf8 = require('utf8');
-const riotKey = 'api_key=' + process.env.RIOTKEY;
+const riotKey = 'api_key=' + process.env.RIOT_KEY;
 const { DiscordAPIError } = require("discord.js");
 const fetch = require("node-fetch");
 const Discord = require('discord.js');
@@ -21,7 +21,7 @@ client
     client.user.setActivity("Master Yi", {type: "PLAYING"})
 }
 )
-.login(process.env.BOTTOKEN);
+.login(process.env.BOT_TOKEN);
 
 // Ranked Emblem Conversion
 const rankedEmblem = {

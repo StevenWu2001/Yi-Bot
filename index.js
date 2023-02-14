@@ -5,7 +5,7 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const {prefix} = require('./config.json');
-client.login(process.env.BOTTOKEN);
+client.login(process.env.BOT_TOKEN);
 
 // Command Handler
 client.commands = new Discord.Collection();
