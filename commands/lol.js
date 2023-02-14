@@ -348,6 +348,9 @@ module.exports = {
                 var kda = "";
                 var position = "";
                 var gameDuration = "";
+                let minions = 0;
+                let camps = 0;
+                let csPerMin = 0.0;             
 
                 // An individual report based on position the player played
                 let individualReport = "";
@@ -366,7 +369,6 @@ module.exports = {
                 durationSec %= 3600
                 let minutes = Math.floor(durationSec / 60);
                 let seconds = durationSec % 60;
-                
                 
                 if (hours != 0) {
                     gameDuration += hours + ":";
@@ -392,6 +394,9 @@ module.exports = {
                         death = data['deaths'];
                         assist = data['assists'];
                         position = data['teamPosition']
+                        minions = data['totalMinionsKilled'];
+                        camps = data['neutralMinionsKilled'];
+                        csPerMin = Math.round(((minions + camps) / matchData['info']['gameDuration']) * 600) / 10; 
 
                         kda = kill + '/' + death + '/' + assist;
                         totalKills += kill;
@@ -407,7 +412,15 @@ module.exports = {
                         if (position == 'TOP') {
 
                         } else if (position == 'JUNGLE') {
-                            
+                            // let minions = data['totalMinionsKilled'];
+                            // let camps = data['neutralMinionsKilled'];
+                            // let csPerMin = Math.round(((minions + camps) / matchData['info']['gameDuration']) * 600) / 10;
+                            // individualReport += '`' + (minions + camps) + ' CS(' + csPerMin + ')`  ';
+
+                            // let dragon = data['dragonKills'];
+                            // let baron = data['baronKills'];
+                            // individualReport += '`' + dragon + '` dragons ' + '`' + baron + '` barons.';
+
                         } else if (position == 'MIDDLE') {
 
                         } else if (position == 'BOTTOM') {
@@ -425,9 +438,11 @@ module.exports = {
                 }
 
                 champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
-                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '`' + '\ ' + champPlayed + champIcon;
+
+                let totalCS = ' `' + (minions + camps) + '(' + csPerMin + ')`';
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '` ' + totalCS + '\u1CBC' + champPlayed + champIcon;
                 matchEmbed.addFields(
-                    {name: (parseInt(matchid) + 1) + '.\u1CBC' + gameType + '\u1CBC' + position, value: matchSummary + '\n' + individualReport},
+                    {name: (parseInt(matchid) + 1) + '.\u1CBC' + gameType + '\u1CBC' + position, value: matchSummary},
                 );
             }
             
