@@ -12,7 +12,7 @@ module.exports = {
 	description: 'Tell a league of legend joke',
 	async execute(message, args) {
         const response = await openai.createCompletion({
-            model: "text-davinci-003",
+            model: "text-curie-001",
             prompt: "Tell me a league of legend joke",
             max_tokens: 500,
           });
