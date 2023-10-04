@@ -364,7 +364,9 @@ module.exports = {
                 var gameDuration = "";
                 let minions = 0;
                 let camps = 0;
-                let csPerMin = 0.0;             
+                let csPerMin = 0.0;        
+                var totalKDTeam = [0, 0]; // win, lose
+                var troll = false;
 
                 // An individual report based on position the player played
                 let individualReport = "";
@@ -398,7 +400,15 @@ module.exports = {
                     gameDuration += '00';
                 }
 
+                // Calculate total deaths and kills for team
+
                 for (const i in matchData['info']['participants']) {
+                    
+                    if (matchData['info']['participants'][i]['win']) {
+                        totalKDTeam[0] += matchData['info']['participants'][i]['kills'];
+                        totalKDTeam[1] += matchData['info']['participants'][i]['deaths'];
+                    } 
+
                     if (matchData['info']['participants'][i]['puuid'] == puuid) {
                         const data = matchData['info']['participants'][i];
                         win = data['win'];
@@ -442,8 +452,6 @@ module.exports = {
                         } else if (position == 'SUPPORT') {
 
                         }
-
-                        break;
                     }
                 }
 
@@ -451,10 +459,41 @@ module.exports = {
                     position = '(' + positionConvert[position] + ')';
                 }
 
+                // Calculate troll score
+
+                var kdaNum = (kill + assist) / Math.max(1, death);
+                if (kdaNum > 0) {
+                    var kp = 0;
+                    if (win) {
+                        kp = (kill + assist) / totalKDTeam[0];
+                    } else {
+                        kp = (kill + assist) / totalKDTeam[1];
+                    }
+
+                    if (kdaNum < 1) {
+                        troll = true;
+                    }
+
+                    if (matchData['info']['queueId'] <= 440) {
+                        if (kdaNum <= 1.5 && kp <= 0.3) {
+                            troll = true;
+                        }
+                    } else {
+                        if (kdaNum <= 1.5 && kp <= 0.6) {
+                            troll = true;
+                        }
+                    }
+                }
+
                 champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
 
                 let totalCS = ' `' + (minions + camps) + '(' + csPerMin + ')`';
-                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '` ' + totalCS + ' ' + champPlayed + champIcon + ' (Troll)';
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '` ' + totalCS + ' ' + champPlayed + champIcon;
+                
+                if (troll) {
+                    matchSummary += ' (Troll)'
+                }
+
                 matchEmbed.addFields(
                     {name: (parseInt(matchid) + 1) + '. ' + gameType + ' ' + position, value: matchSummary},
                 );
