@@ -25,15 +25,16 @@ client
 
 // Ranked Emblem Conversion
 const rankedEmblem = {
-    0: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Iron.png',
-    1: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Bronze.png',
-    2: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Silver.png',
-    3: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Gold.png',
-    4: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Platinum.png',
-    5: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Diamond.png',
-    6: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Master.png',
-    7: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Grandmaster.png',
-    8: 'https://raw.githubusercontent.com/StevenWu2001/Discord-Bot-for-LOL/main/img/rankEmblems/Emblem_Challenger.png',
+    0: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-iron.png?raw=true',
+    1: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-bronze.png?raw=true',
+    2: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-silver.png?raw=true',
+    3: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-gold.png?raw=true',
+    4: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-platinum.png?raw=true',
+    5: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/Emblem_Emerald.png?raw=true',
+    6: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-diamond.png?raw=true',
+    7: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-master.png?raw=true',
+    8: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-grandmaster.png?raw=true',
+    9: 'https://github.com/StevenWu2001/Yi-Bot/blob/main/img/rankEmblems/emblem-challenger.png?raw=true'
 };
 
 const rankedConvert = {
@@ -42,10 +43,11 @@ const rankedConvert = {
     "SILVER": 2,
     "GOLD": 3,
     "PLATINUM": 4,
-    "DIAMOND": 5,
-    "MASTER": 6,
-    "GRANDMASTER": 7,
-    "CHALLENGER": 8
+    "EMERALD": 5,
+    "DIAMOND": 6,
+    "MASTER": 7,
+    "GRANDMASTER": 8,
+    "CHALLENGER": 9
 }
 
 const numsToRank = {
@@ -54,10 +56,11 @@ const numsToRank = {
     2: "SILVER",
     3: "GOLD",
     4: "PLATINUM",
-    5: "DIAMOND",
-    6: "MASTER",
-    7: "GRANDMASTER",
-    8: "CHALLENGER"
+    5: "EMERALD",
+    6: "DIAMOND",
+    7: "MASTER",
+    8: "GRANDMASTER",
+    9: "CHALLENGER"
 }
 
 // Convert from queue ID to match type
@@ -83,6 +86,8 @@ const positionConvert = {
     'SUPPORT': 'Sup'
 }
 
+inUse = false;
+
 // Command Process
 module.exports = {
     // show lol rank #name
@@ -92,6 +97,12 @@ module.exports = {
     name: 'lol',
     description: 'A show command',
     async execute(message, args) {
+
+        if (inUse) {
+            return message.channel.send(`${message.author} A command is currently running...`)
+        };
+        inUse = true;
+
         var split = message.content.split(' ')
         var summonerName = '';
         var encryptedID = '';          // Summoner ID
@@ -102,8 +113,8 @@ module.exports = {
         var numOfMatch = 5;
         
         if (!isNaN(split[split.length - 1])) {
-            numOfMatch = parseInt(split[split.length - 1])
-            split.pop()
+            numOfMatch = Math.min(parseInt(split[split.length - 1]), 20);
+            split.pop();
         }
 
         // Champion ID lookup table
@@ -205,7 +216,7 @@ module.exports = {
                 var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  Winrate: `' + winRate + '%`';
 
                 rankEmbed.setColor('#0099ff');
-                rankEmbed.setTitle('Rank Summary for `' + summonerName + '`');
+                rankEmbed.setTitle(summonerName);
                 rankEmbed.setDescription('Summoner Level: `' + summonerLevel + '`');
                 rankEmbed.addFields(
                     { name: queueType + ': ' + rankTier, value: WRData },
@@ -269,10 +280,13 @@ module.exports = {
                 }
 
             }
+
             if (highestRank != -1) {
                 rankEmbed.setThumbnail(rankedEmblem[highestRank]);
             }
-
+            
+            // Send to chat
+            message.channel.send(`${message.author}!`);
             message.channel.send(rankEmbed);
         } else if (split[1] == 'freerotation') {
             freeChamps = [];
@@ -312,11 +326,11 @@ module.exports = {
                 { name: 'Free Champions: ', value: freeChampsStr, inline: true },
                 { name: 'Free Rotation For Players Under lv 10: ', value: freeChampsForNewStr, inline: true }
             );
-
+            
             message.channel.send(freeRotationEmbed);
 
         } else if (split[1] == 'match') {
-            message.channel.send("Fetching match history... (more matches will take more time)")
+            message.channel.send("Fetching match history...")
             // W or L
             // Champ played
             // Type of game
@@ -440,9 +454,9 @@ module.exports = {
                 champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
 
                 let totalCS = ' `' + (minions + camps) + '(' + csPerMin + ')`';
-                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '` ' + totalCS + '\u1CBC' + champPlayed + champIcon;
+                var matchSummary = (win ? ':white_check_mark:' : ':x:') + '`' + gameDuration + '`' + ' `' + kda + '` ' + totalCS + ' ' + champPlayed + champIcon + ' (Troll)';
                 matchEmbed.addFields(
-                    {name: (parseInt(matchid) + 1) + '.\u1CBC' + gameType + '\u1CBC' + position, value: matchSummary},
+                    {name: (parseInt(matchid) + 1) + '. ' + gameType + ' ' + position, value: matchSummary},
                 );
             }
             
@@ -450,11 +464,15 @@ module.exports = {
             var winrate = Math.round(totalWins / (totalWins + totalLosses) * 100) / 100;
             matchEmbed.setThumbnail('http://ddragon.leagueoflegends.com/cdn/13.1.1/img/profileicon/' + iconID + '.png');
             matchEmbed.setTitle('Recent ' + (totalWins + totalLosses) + ' Match(es) for ```' + summonerName + '```');
-            matchEmbed.setDescription('Average KDA: `' + avgKda + '`\u1CBCWinrate: `' + winrate + '`')
-
+            matchEmbed.setDescription('Average KDA: `' + avgKda + '` Winrate: `' + winrate + '`')
+            
+            // Send to chat
+            message.channel.send(`${message.author}!`);
             message.channel.send(matchEmbed);
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
+        
+        inUse = false;
     },
 };
