@@ -57,6 +57,12 @@ client.on(Events.InteractionCreate, async interaction => {
             choices += `${value}`
         })
 
-        await interaction.reply({content: `${choices}`})
+        try {
+            await interaction.reply({content: "Here it is!"})
+            client.commands.get("lol").execute(choices, "__match__", interaction);
+        } catch (error) {
+            console.log(error.message)
+            message.reply("This command cannot be executed!");
+        }
     }
 })

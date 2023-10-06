@@ -105,9 +105,9 @@ module.exports = {
     name: 'lol',
     description: 'A show command',
     async execute(message, args, interaction) {
-        inUse = true;
-
-        var split = message.content.split(' ')
+        console.log(message)
+        console.log(args)
+        var split;
         var summonerName = '';
         var encryptedID = '';          // Summoner ID
         var accountID = '';
@@ -115,36 +115,41 @@ module.exports = {
         var puuid = '';
         var iconID = '';
         var numOfMatch = 5;
-        
-        if (!isNaN(split[split.length - 1])) {
-            numOfMatch = Math.min(parseInt(split[split.length - 1]), 20);
-            split.pop();
+        var IDTable;
+
+        if (args != '__match__') {      
+            split = message.content.split(' ');
+            if (!isNaN(split[split.length - 1])) {
+                numOfMatch = Math.min(parseInt(split[split.length - 1]), 20);
+                split.pop();
+            }
+
+            // Champion ID lookup table
+            const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
+            IDTable = await IDResponse.json();
+            
+
+            for (var i = 2; i < split.length; i++) {
+                summonerName += split[i] + '%20';
+            }
+            summonerName = utf8.encode(summonerName);
+            const link = summonerSearchLink + summonerName + '?' + riotKey;
+            const response = await fetch(link);
+            let summonerData = await response.json();
+            if (summonerData.hasOwnProperty('status') && summonerData.status.status_code == 404) {
+                message.channel.send("This summoner name cannot be found!");
+                return;
+            }
+
+            encryptedID = summonerData.id;
+            summonerName = summonerData.name;
+            summonerLevel = summonerData.summonerLevel;
+            accountID = summonerData.accountId;
+            puuid = summonerData.puuid
+            iconID = summonerData.profileIconId;
+        } else {
+            split = [" ", args]
         }
-
-        // Champion ID lookup table
-        const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
-        const IDTable = await IDResponse.json();
-        
-
-        for (var i = 2; i < split.length; i++) {
-            summonerName += split[i] + '%20';
-        }
-        summonerName = utf8.encode(summonerName);
-        const link = summonerSearchLink + summonerName + '?' + riotKey;
-        const response = await fetch(link);
-        let summonerData = await response.json();
-        if (summonerData.hasOwnProperty('status') && summonerData.status.status_code == 404) {
-            message.channel.send("This summoner name cannot be found!");
-            return;
-        }
-
-        encryptedID = summonerData.id;
-        summonerName = summonerData.name;
-        summonerLevel = summonerData.summonerLevel;
-        accountID = summonerData.accountId;
-        puuid = summonerData.puuid
-        iconID = summonerData.profileIconId;
-
 
         // Champion Mastery Lookup
         if (split[1] == 'mastery') {
@@ -374,6 +379,7 @@ module.exports = {
                 let csPerMin = 0.0;        
                 var totalKDTeam = [0, 0]; // win, lose
                 var troll = false;
+                var champIcon;
 
                 // An individual report based on position the player played
                 let individualReport = "";
@@ -505,9 +511,8 @@ module.exports = {
                     {name: (parseInt(matchid) + 1) + '. ' + gameType + ' ' + position, value: matchSummary},
                 );
                 
-                console.log(matchid)
                 matchDropdown.addOptions(
-                    {label: (win ? '(WIN) ' : '(LOSS) ') + kda + ' ' + gameDuration, description: gameType + ' ' + position, value: matchidList[matchid], emoji: champIcon}
+                    {label: (win ? '(WIN) ' : '(LOSS) ') + kda + ' ' + gameDuration, description: gameType + ' ' + position, value: puuid + " " + matchidList[matchid], emoji: champIcon}
                 )
             }
             
@@ -526,8 +531,205 @@ module.exports = {
             message.channel.send('Pick a match to view the details!');
             message.channel.send({ components: [matchDropdownFinal] });
 
-        } else if (split[1] == 'smatch') {
+        } else if (split[1] == '__match__') {
+            var matchID = message.split(" ")[1]
+            puuid = message.split(" ")[0]
+            var matchlink = matchLookupLink + matchID + '?' + riotKey;
+            const matchResponse = await fetch(matchlink);
+            let matchData = await matchResponse.json();
 
+            var win = false;
+            var champPlayed = "";
+            var champId = "";
+            var gameType = "";
+            var kill = 0;
+            var death = 0;
+            var assist = 0;
+            var kda = "";
+            var position = "";
+            var gameDuration = "";
+            var minions = 0;
+            var camps = 0;
+            var csPerMin = 0.0; 
+            var champIcon;
+            var totalCS;
+
+            var CCTime;
+            var visionScore;
+            var wardBought;
+            var wardsKilled;
+            var wardsPlaced;
+            var killingSprees;
+            var numItemPurchased;
+            var longestTimeLiving;
+            var QPress;
+            var WPress;
+            var EPress;
+            var RPress;
+
+            var teamLChamp = []
+            var teamWChamp = []
+            var teamLChampIcon = []
+            var teamWChampIcon = []
+            var teamLName = []
+            var teamWName = []
+            var teamLKDA = []
+            var teamWKDA = []
+            var teamLTotalCS = []
+            var teamWTotalCS = []
+            var teamLCSPerMin = []
+            var teamWCSPerMin = []
+    
+            gameType = queueIDConvert[matchData['info']['queueId']];
+            if (gameType == null) {
+                gameType = 'Other';
+            }
+
+            let durationSec = matchData['info']['gameDuration']
+            let hours = Math.floor(durationSec / 3600);
+            durationSec %= 3600
+            let minutes = Math.floor(durationSec / 60);
+            let seconds = durationSec % 60;
+            
+            if (hours != 0) {
+                gameDuration += hours + ":";
+            }
+            if (minutes != 0) {
+                gameDuration += minutes + ':';
+            } else {
+                gameDuration += '00:';
+            }
+            if (seconds != 0) {
+                gameDuration += seconds;
+            } else {
+                gameDuration += '00';
+            }
+
+            var matchEmbed = new Discord.EmbedBuilder();
+            matchEmbed.setColor("#0099ff");
+            matchEmbed.setTitle(gameType)
+
+            for (const i in matchData['info']['participants']) {
+                const data = matchData['info']['participants'][i];
+                if (data['puuid'] == puuid) {   
+                    win = data['win'];
+                    champPlayed = data['championName'];
+                    champId = data['championId'];
+                    kill = data['kills'];
+                    death = data['deaths'];
+                    assist = data['assists'];
+                    position = data['teamPosition']
+                    minions = data['totalMinionsKilled'];
+                    camps = data['neutralMinionsKilled'];
+                    csPerMin = Math.round(((minions + camps) / matchData['info']['gameDuration']) * 600) / 10; 
+
+                    kda = kill + '/' + death + '/' + assist;
+                    totalKills += kill;
+                    totalDeaths += death;
+                    totalAssists += assist;
+
+                    CCTime = data['timeCCingOthers'];
+                    visionScore = data['visionScore'];
+                    wardBought = data['visionWardsBoughtInGame'];
+                    wardsKilled = data['wardsKilled'];
+                    wardsPlaced = data['wardsPlaced'];
+                    killingSprees = data['killingSprees'];
+                    numItemPurchased = data['itemsPurchased'];
+                    longestTimeLiving = data['longestTimeSpentLiving'];
+                    QPress = data['spell1Casts'];
+                    WPress = data['spell2Casts'];
+                    EPress = data['spell3Casts'];
+                    RPress = data['spell4Casts'];
+                }
+
+                if (data['win']) {
+                    teamWChampIcon.push('<:pic' + data['championId'] + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + data['championId']) + '>');
+
+                    teamWChamp.push(data['championName']);
+
+                    teamWName.push(data['summonerName']);
+
+                    var tempKill = data['kills'];
+                    var tempDeath = data['deaths'];
+                    var tempAssist = data['assists'];
+                    var tempKda = tempKill + '/' + tempDeath + '/' + tempAssist;
+                    teamWKDA.push(tempKda);
+
+                    var tempMinions = data['totalMinionsKilled'];
+                    var tempCamps = data['neutralMinionsKilled'];
+                    var tempCS = Math.round(((tempMinions + tempCamps) / matchData['info']['gameDuration']) * 600) / 10; 
+                    teamWTotalCS.push(tempMinions + tempCamps);
+                    teamWCSPerMin.push(tempCS);
+                } else {
+                    teamLChampIcon.push('<:pic' + data['championId'] + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + data['championId']) + '>');
+
+                    teamLChamp.push(data['championName']);
+
+                    teamLName.push(data['summonerName']);
+
+                    var tempKill = data['kills'];
+                    var tempDeath = data['deaths'];
+                    var tempAssist = data['assists'];
+                    var tempKda = tempKill + '/' + tempDeath + '/' + tempAssist;
+                    teamLKDA.push(tempKda);
+
+                    var tempMinions = data['totalMinionsKilled'];
+                    var tempCamps = data['neutralMinionsKilled'];
+                    var tempCS = Math.round(((tempMinions + tempCamps) / matchData['info']['gameDuration']) * 600) / 10; 
+                    teamLTotalCS.push(tempMinions + tempCamps);
+                    teamLCSPerMin.push(tempCS);
+                }               
+            }
+            console.log(teamWChamp)
+            var winningTeamInfo = ""
+            for (var i = 0; i < matchData['info']['participants'].length / 2; i++) {
+                winningTeamInfo += ":blue_square: ";
+                winningTeamInfo += teamWChampIcon[i] + " `";
+                winningTeamInfo += teamWName[i] + "` `";
+                winningTeamInfo += teamWKDA[i] + "` ";
+                winningTeamInfo += "`" + teamWTotalCS[i] + "(";
+                winningTeamInfo += teamWCSPerMin[i] + ")`"
+                winningTeamInfo += "\n\n";
+            }
+
+            var lossingTeamInfo = ""
+            for (var i = 0; i <  matchData['info']['participants'].length / 2; i++) {
+                lossingTeamInfo += ":red_square: ";
+                lossingTeamInfo += teamLChampIcon[i] + " `";
+                lossingTeamInfo += teamLName[i] + "` `";
+                lossingTeamInfo += teamLKDA[i] + "` "
+                lossingTeamInfo += "`" + teamLTotalCS[i] + "(";
+                lossingTeamInfo += teamLCSPerMin[i] + ")`"
+                lossingTeamInfo += "\n\n";
+            }
+
+            champIcon = '<:pic' + champId + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + champId) + '>';
+            totalCS = ' `' + (minions + camps) + '(' + csPerMin + ')`';
+
+            matchEmbed.setDescription((win ? ':white_check_mark:' : ':x:') + " Duration: `" + gameDuration + '` `' + kda + '` ' + totalCS + ' ' + champPlayed + champIcon)
+            console.log(winningTeamInfo)
+            matchEmbed.addFields({name: "Victory", value: winningTeamInfo});
+            matchEmbed.addFields({name: "Defeat", value: lossingTeamInfo});
+            
+
+            // Compute fun info
+            var funInfo = ":keyboard: Key Pressed: " + 
+                        "Q: `" + QPress + "`" + 
+                        " W: `" + WPress + "`" +
+                        " E: `" + EPress + "`" + 
+                        " R: `" + RPress + "`" + "\n";
+            
+            funInfo += ":eye: Vision Score: `" + visionScore + "`\n";
+            funInfo += ":goggles: Ward Bought/Placed/Killed: `" + wardBought + "/" + wardsPlaced + "/" + wardsKilled + "`\n";
+
+            funInfo += ":gear: Number of Items Purchased: `" + numItemPurchased + "`\n"; 
+
+            funInfo += ":drop_of_blood: Killing Sprees: `" + killingSprees + "`\n"; 
+
+            matchEmbed.addFields({name: "Fun Info", value: funInfo});
+
+            interaction.channel.send({ embeds: [matchEmbed] })
+            
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
