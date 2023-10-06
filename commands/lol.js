@@ -23,13 +23,7 @@ const client = new Client({
     partials: [Partials.Channel, Partials.Message],
   });
 var emojiList = []
-client
-.on('ready', () =>{
-    emojiList = client.emojis
-    client.user.setActivity("Master Yi", {type: "PLAYING"})
-}
-)
-.login(process.env.BOT_TOKEN);
+client.login(process.env.BOT_TOKEN);
 
 // Ranked Emblem Conversion
 const rankedEmblem = {

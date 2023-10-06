@@ -3,7 +3,7 @@ require("dotenv").config();
 // Initialize Setups
 const fs = require('fs');
 const Discord = require('discord.js');
-const { Client, GatewayIntentBits, Partials, Events } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Events, ActivityType  } = require('discord.js');
 const {prefix} = require('./config.json');
 
 const client = new Client({
@@ -19,7 +19,7 @@ const client = new Client({
 client
 .on('ready', () =>{
     emojiList = client.emojis
-    client.user.setActivity("Master Yi", {type: "PLAYING"})
+    client.user.setActivity("Master Yi", {type: ActivityType.Playing})
 }
 )
 client.login(process.env.BOT_TOKEN);
