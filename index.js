@@ -15,6 +15,13 @@ const client = new Client({
     ],
     partials: [Partials.Channel, Partials.Message],
   });
+
+client
+.on('ready', () =>{
+    emojiList = client.emojis
+    client.user.setActivity("Master Yi", {type: "PLAYING"})
+}
+)
 client.login(process.env.BOT_TOKEN);
 
 // Command Handler
