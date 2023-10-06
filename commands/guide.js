@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const { ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
 
 const dot = ":diamond_shape_with_a_dot_inside:";
 
@@ -13,7 +14,7 @@ module.exports = {
 
         var apex = "1: Player Stats :bulb:\n`!apex player ORIGIN_USERNAME`\n\n";
 
-		const helpEmbed = new Discord.MessageEmbed();
+		const helpEmbed = new Discord.EmbedBuilder();
         helpEmbed.setColor('#0099ff');
         helpEmbed.setTitle('A List of Available Commands');
         helpEmbed.setDescription('Type the following commands to the bot!');
@@ -22,6 +23,6 @@ module.exports = {
             {name : dot + " Apex Legends", value : apex + "\n"},
             {name : dot + ' Guide :hammer_and_wrench:', value : '`!guide`'},
         );
-        message.channel.send(helpEmbed);
+        message.channel.send({ embeds: [helpEmbed] });
 	},
 };

@@ -7,13 +7,21 @@ const matchLookupLink = 'https://americas.api.riotgames.com/lol/match/v5/matches
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOT_KEY;
-const { DiscordAPIError } = require("discord.js");
-const fetch = require("node-fetch");
+const { DiscordAPIError, ActionRowBuilder, StringSelectMenuBuilder} = require("discord.js");
+//const fetch = require("node-fetch");
 const Discord = require('discord.js');
-const { AttachmentBuilder, EmbedBuilder, Client } = require('discord.js');
+const { Client, GatewayIntentBits, Partials } = require('discord.js');
 
 // Initialize Client
-const client = new Discord.Client();
+const client = new Client({
+    intents: [
+      GatewayIntentBits.DirectMessages,
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
+    partials: [Partials.Channel, Partials.Message],
+  });
 var emojiList = []
 client
 .on('ready', () =>{
@@ -96,11 +104,7 @@ module.exports = {
     // show lol match #name
     name: 'lol',
     description: 'A show command',
-    async execute(message, args) {
-
-        if (inUse) {
-            return message.channel.send(`${message.author} A command is currently running...`)
-        };
+    async execute(message, args, interaction) {
         inUse = true;
 
         var split = message.content.split(' ')
@@ -169,7 +173,7 @@ module.exports = {
                 }
             }
 
-            const masteryEmbed = new Discord.MessageEmbed()
+            const masteryEmbed = new Discord.EmbedBuilder()
                 .setColor('#0099ff')
                 .setTitle('Summoner Champion Mastery Summary for `' + summonerName + '`')
                 .setDescription('Top 10 Highest Mastery Champions')
@@ -185,13 +189,13 @@ module.exports = {
                     { name: '9: `' + names[8] + '`', value: masteries[8] },
                     { name: '10:  `' + names[9] + '`', value: masteries[9] },
                 )
-            message.channel.send(masteryEmbed);
+            message.channel.send({ embeds: [masteryEmbed] });
         } else if (split[1] == 'rank') { // Player Rank Lookup (Solo and Flex)
             const rankLink = accountInfoLink + encryptedID + '?' + riotKey;
             const accountResponse = await fetch(rankLink);
             let accountData = await accountResponse.json();
             console.log(accountData);
-            const rankEmbed = new Discord.MessageEmbed();
+            const rankEmbed = new Discord.EmbedBuilder();
             var highestRank = -1;
 
             // Unranked Account
@@ -287,14 +291,14 @@ module.exports = {
             
             // Send to chat
             message.channel.send(`${message.author}!`);
-            message.channel.send(rankEmbed);
+            message.channel.send({ embeds: [rankEmbed] });
         } else if (split[1] == 'freerotation') {
             freeChamps = [];
             freeChampsStr = '';
             freeChampsForNew = [];
             freeChampsForNewStr = '';
 
-            freeRotationEmbed = new Discord.MessageEmbed();
+            freeRotationEmbed = new Discord.EmbedBuilder();
             freeRotationEmbed.setColor("#0099ff");
             freeRotationEmbed.setTitle("This Week's Champion Free Rotation:");
 
@@ -327,15 +331,18 @@ module.exports = {
                 { name: 'Free Rotation For Players Under lv 10: ', value: freeChampsForNewStr, inline: true }
             );
             
-            message.channel.send(freeRotationEmbed);
+            message.channel.send({ embeds: [freeRotationEmbed] });
 
         } else if (split[1] == 'match') {
             message.channel.send("Fetching match history...")
             // W or L
             // Champ played
             // Type of game
-            matchEmbed = new Discord.MessageEmbed();
+            matchEmbed = new Discord.EmbedBuilder();
             matchEmbed.setColor("#0099ff");
+
+            const matchDropdown = new StringSelectMenuBuilder()
+                .setCustomId('Match Dropdown')
             
             console.log(split)
             const link = matchHistoryLink + puuid + '/ids?start=0&count=' + numOfMatch + '&' + riotKey;
@@ -497,6 +504,11 @@ module.exports = {
                 matchEmbed.addFields(
                     {name: (parseInt(matchid) + 1) + '. ' + gameType + ' ' + position, value: matchSummary},
                 );
+                
+                console.log(matchid)
+                matchDropdown.addOptions(
+                    {label: (win ? '(WIN) ' : '(LOSS) ') + kda + ' ' + gameDuration, description: gameType + ' ' + position, value: matchidList[matchid], emoji: champIcon}
+                )
             }
             
             var avgKda = Math.round(((totalKills + totalAssists) / totalDeaths) * 100) / 100;
@@ -507,7 +519,15 @@ module.exports = {
             
             // Send to chat
             message.channel.send(`${message.author}!`);
-            message.channel.send(matchEmbed);
+            message.channel.send({ embeds: [matchEmbed] });
+
+            // Select Match
+            const matchDropdownFinal = new ActionRowBuilder().addComponents(matchDropdown);
+            message.channel.send('Pick a match to view the details!');
+            message.channel.send({ components: [matchDropdownFinal] });
+
+        } else if (split[1] == 'smatch') {
+
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
