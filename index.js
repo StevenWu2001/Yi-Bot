@@ -33,7 +33,6 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-console.log(client.commands)
 
 // Execute Commands
 client.on(Events.MessageCreate, message => {
@@ -46,7 +45,7 @@ client.on(Events.MessageCreate, message => {
     if (!client.commands.has(first)) {
         return;
     }
-    console.log(client.commands.get(first))
+
     try {
         client.commands.get(first).execute(message, args);
     } catch (error) {
