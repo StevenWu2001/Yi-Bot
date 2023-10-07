@@ -531,6 +531,7 @@ module.exports = {
             var matchlink = matchLookupLink + matchID + '?' + riotKey;
             const matchResponse = await fetch(matchlink);
             let matchData = await matchResponse.json();
+            var gameDate = new Date(matchData['info']['gameStartTimestamp'])
 
             var win = false;
             var champPlayed = "";
@@ -556,6 +557,7 @@ module.exports = {
             var killingSprees;
             var numItemPurchased;
             var longestTimeLiving;
+            var deathTime;
             var QPress;
             var WPress;
             var EPress;
@@ -573,6 +575,8 @@ module.exports = {
             var teamWTotalCS = []
             var teamLCSPerMin = []
             var teamWCSPerMin = []
+            var teamLSums = []
+            var teamWSums = []
     
             gameType = queueIDConvert[matchData['info']['queueId']];
             if (gameType == null) {
@@ -601,7 +605,7 @@ module.exports = {
 
             var matchEmbed = new Discord.EmbedBuilder();
             matchEmbed.setColor("#0099ff");
-            matchEmbed.setTitle(gameType)
+            matchEmbed.setTitle(`${gameType} - ${gameDate.getUTCMonth() + 1}/${gameDate.getDate()}/${gameDate.getUTCFullYear()}`)
 
             for (const i in matchData['info']['participants']) {
                 const data = matchData['info']['participants'][i];
@@ -630,6 +634,7 @@ module.exports = {
                     killingSprees = data['killingSprees'];
                     numItemPurchased = data['itemsPurchased'];
                     longestTimeLiving = data['longestTimeSpentLiving'];
+                    deathTime = data['totalTimeSpentDead'];
                     QPress = data['spell1Casts'];
                     WPress = data['spell2Casts'];
                     EPress = data['spell3Casts'];
@@ -654,6 +659,9 @@ module.exports = {
                     var tempCS = Math.round(((tempMinions + tempCamps) / matchData['info']['gameDuration']) * 600) / 10; 
                     teamWTotalCS.push(tempMinions + tempCamps);
                     teamWCSPerMin.push(tempCS);
+
+                    teamWSums.push(data['summoner1Id'])
+                    teamWSums.push(data['summoner2Id'])
                 } else {
                     teamLChampIcon.push('<:pic' + data['championId'] + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + data['championId']) + '>');
 
@@ -672,9 +680,12 @@ module.exports = {
                     var tempCS = Math.round(((tempMinions + tempCamps) / matchData['info']['gameDuration']) * 600) / 10; 
                     teamLTotalCS.push(tempMinions + tempCamps);
                     teamLCSPerMin.push(tempCS);
+
+                    teamLSums.push(data['summoner1Id'])
+                    teamLSums.push(data['summoner2Id'])
                 }               
             }
-            console.log(teamWChamp)
+
             var winningTeamInfo = ""
             for (var i = 0; i < matchData['info']['participants'].length / 2; i++) {
                 winningTeamInfo += ":blue_square: ";
@@ -682,7 +693,9 @@ module.exports = {
                 winningTeamInfo += teamWName[i] + "` `";
                 winningTeamInfo += teamWKDA[i] + "` ";
                 winningTeamInfo += "`" + teamWTotalCS[i] + "(";
-                winningTeamInfo += teamWCSPerMin[i] + ")`"
+                winningTeamInfo += teamWCSPerMin[i] + ")` "
+                winningTeamInfo += '  <:sum' + teamWSums[i * 2] + ':' + client.emojis.cache.find(emoji => emoji.name === "sum" + teamWSums[i * 2]) + '> ';
+                winningTeamInfo += '  <:sum' + teamWSums[i * 2 + 1] + ':' + client.emojis.cache.find(emoji => emoji.name === "sum" + teamWSums[i * 2 + 1]) + '> ';
                 winningTeamInfo += "\n\n";
             }
 
@@ -694,6 +707,8 @@ module.exports = {
                 lossingTeamInfo += teamLKDA[i] + "` "
                 lossingTeamInfo += "`" + teamLTotalCS[i] + "(";
                 lossingTeamInfo += teamLCSPerMin[i] + ")`"
+                lossingTeamInfo += '  <:sum' + teamLSums[i * 2] + ':' + client.emojis.cache.find(emoji => emoji.name === "sum" + teamLSums[i * 2]) + '> ';
+                lossingTeamInfo += '  <:sum' + teamLSums[i * 2 + 1] + ':' + client.emojis.cache.find(emoji => emoji.name === "sum" + teamLSums[i * 2 + 1]) + '> ';
                 lossingTeamInfo += "\n\n";
             }
 
@@ -701,27 +716,26 @@ module.exports = {
             totalCS = ' `' + (minions + camps) + '(' + csPerMin + ')`';
 
             matchEmbed.setDescription((win ? ':white_check_mark:' : ':x:') + " Duration: `" + gameDuration + '` `' + kda + '` ' + totalCS + ' ' + champPlayed + champIcon)
-            console.log(winningTeamInfo)
             matchEmbed.addFields({name: "Victory", value: winningTeamInfo});
             matchEmbed.addFields({name: "Defeat", value: lossingTeamInfo});
             
-
             // Compute fun info
             var funInfo = ":keyboard: Key Pressed: " + 
                         "Q: `" + QPress + "`" + 
                         " W: `" + WPress + "`" +
                         " E: `" + EPress + "`" + 
                         " R: `" + RPress + "`" + "\n";
-            
             funInfo += ":eye: Vision Score: `" + visionScore + "`\n";
             funInfo += ":goggles: Ward Bought/Placed/Killed: `" + wardBought + "/" + wardsPlaced + "/" + wardsKilled + "`\n";
-
             funInfo += ":gear: Number of Items Purchased: `" + numItemPurchased + "`\n"; 
-
             funInfo += ":drop_of_blood: Killing Sprees: `" + killingSprees + "`\n"; 
+            if (deathTime == 0) {
+                funInfo += `:skull: Refused to die`
+            } else {
+                funInfo += `:skull: Spent ${Math.round(deathTime * 100.0 / durationSec) }% of time dead`
+            }
 
             matchEmbed.addFields({name: "Fun Info", value: funInfo});
-
             interaction.channel.send({ embeds: [matchEmbed] })
             
         } else {
