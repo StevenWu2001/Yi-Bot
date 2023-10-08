@@ -3,7 +3,7 @@ require("dotenv").config();
 // Initialize Setups
 const fs = require('fs');
 const Discord = require('discord.js');
-const { Client, GatewayIntentBits, Partials, Events, ActivityType} = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Events, ActivityType, REST, Routes} = require('discord.js');
 const { VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
 const {prefix} = require('./config.json');
 const { Player } = require('discord-player')

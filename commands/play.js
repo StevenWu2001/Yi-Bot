@@ -2,6 +2,7 @@ const Discord = require('discord.js');
 const ytdl = require("ytdl-core");
 const { joinVoiceChannel } = require('@discordjs/voice');
 const { QueryType } = require("discord-player");
+const { QueueRepeatMode } = require("discord-player");
 
 module.exports = {
 	name: 'play',
@@ -22,6 +23,9 @@ module.exports = {
                leaveOnEnd: false,
                leaveOnEndCooldown: 300000,
              });
+        
+        // Repeat current track
+        queue.setRepeatMode(QueueRepeatMode.TRACK);
 
         if(!queue.connection) {
             await queue.connect(voiceChannel);

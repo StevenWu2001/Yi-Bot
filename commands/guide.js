@@ -14,12 +14,15 @@ module.exports = {
 
         var apex = "1: Player Stats :bulb:\n`!apex player ORIGIN_USERNAME`\n\n";
 
+        var music = "1: Play Music :musical_note:\n `!play SONG_NAME / LINK`\n\n";
+
 		const helpEmbed = new Discord.EmbedBuilder();
         helpEmbed.setColor('#0099ff');
         helpEmbed.setTitle('A List of Available Commands');
         helpEmbed.setDescription('Type the following commands to the bot!');
         helpEmbed.addFields(
             {name : dot + ' League of Legends', value: lolCmd + "\n"},
+            {name : dot + ' Music', value : music + "\n"},
             {name : dot + " Apex Legends", value : apex + "\n"},
             {name : dot + ' Guide :hammer_and_wrench:', value : '`!guide`'},
         );
