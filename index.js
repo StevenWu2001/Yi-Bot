@@ -33,9 +33,16 @@ client.login(process.env.BOT_TOKEN);
 client.player = Player.singleton(client);
 client.player.events.on('connection', (queue) => {
     queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
-        if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
-            queue.dispatcher.voiceConnection.configureNetworking();
-        }
+      const oldNetworking = Reflect.get(oldState, 'networking');
+      const newNetworking = Reflect.get(newState, 'networking');
+  
+      const networkStateChangeHandler = (oldNetworkState, newNetworkState) => {
+        const newUdp = Reflect.get(newNetworkState, 'udp');
+        clearInterval(newUdp?.keepAliveInterval);
+      }
+  
+      oldNetworking?.off('stateChange', networkStateChangeHandler);
+      newNetworking?.on('stateChange', networkStateChangeHandler);
     });
 });
 
