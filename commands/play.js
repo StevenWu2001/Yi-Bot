@@ -14,7 +14,15 @@ module.exports = {
             return;
         }
 
-        const queue = await client.player.nodes.create(message.guild);
+        const queue = client.player.nodes.create(message.guild, {
+               selfDeaf: false,
+               volume: 80,
+               leaveOnEmpty: false,
+               leaveOnEmptyCooldown: 300000,
+               leaveOnEnd: false,
+               leaveOnEndCooldown: 300000,
+             });
+
         if(!queue.connection) {
             await queue.connect(voiceChannel);
         }

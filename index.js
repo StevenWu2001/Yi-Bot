@@ -41,7 +41,6 @@ for (const file of commandFiles) {
     client.commands.set(command.name, command);
 }
 
-
 // Execute Commands
 client.on(Events.MessageCreate, message => {
     if (!message.content.startsWith(prefix) || message.author.bot) {
