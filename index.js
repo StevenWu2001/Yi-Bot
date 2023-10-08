@@ -33,6 +33,7 @@ client.login(process.env.BOT_TOKEN);
 client.player = new Player(client);
 client.player.on(AudioPlayerStatus.Idle, () => {
     setTimeout(() => {
+        console.log("BOTTIMEOUT");
     }, 15000);
   })
 
