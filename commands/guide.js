@@ -15,6 +15,7 @@ module.exports = {
         var apex = "1: Player Stats :bulb:\n`!apex player ORIGIN_USERNAME`\n\n";
 
         var music = "1: Play Music :musical_note:\n `!play SONG_NAME / LINK`\n\n";
+        music = "2: Disconnecting the Bot :musical_note:\n `!quit`\n\n";
 
 		const helpEmbed = new Discord.EmbedBuilder();
         helpEmbed.setColor('#0099ff');
