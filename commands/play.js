@@ -27,12 +27,13 @@ module.exports = {
             // Play the first song in the track   
             const song = searchRes.tracks[0];
             console.log(song)
-            message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
             await queue.addTrack(song);
 
             if (!queue.playing) {
                 await queue.node.play();
             }
+            
+            message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
         } catch (e) {
             message.channel.send("No songs found!");
             return;
