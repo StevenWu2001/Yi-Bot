@@ -31,6 +31,13 @@ client
 client.login(process.env.BOT_TOKEN);
 
 client.player = Player.singleton(client);
+client.player.events.on('connection', (queue) => {
+    queue.dispatcher.voiceConnection.on('stateChange', (oldState, newState) => {
+        if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+            queue.dispatcher.voiceConnection.configureNetworking();
+        }
+    });
+});
 
 // Command Handler
 client.commands = new Discord.Collection();
