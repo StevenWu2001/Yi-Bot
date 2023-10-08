@@ -1,44 +1,41 @@
 const Discord = require('discord.js');
 const ytdl = require("ytdl-core");
 const { joinVoiceChannel } = require('@discordjs/voice');
-
-const queue = [];
+const { QueryType } = require("discord-player");
 
 module.exports = {
 	name: 'play',
 	description: 'The play music command',
-	async execute(message, args) {
+	async execute(message, args, interaction, client) {
+        await client.player.extractors.loadDefault();
         const voiceChannel = message.member.voice.channel;
         if (!voiceChannel) {
-            message.channel.send("You are not in a voice channel!");
+            message.channel.send("You must be in a voice channel!");
             return;
         }
 
-        const songInfo = await ytdl.getInfo("https://www.youtube.com/watch?v=Wc5IbN4xw70&ab_channel=CardiB");
-        const song = {
-            title: songInfo.videoDetails.title,
-            url: songInfo.videoDetails.video_url,
-        };
+        const queue = await client.player.nodes.create(message.guild);
+        if(!queue.connection) {
+            await queue.connect(voiceChannel);
+        }
 
-        if (queue.length == 0) {
-            try {
-                const connection = joinVoiceChannel({
-                    channelId: voiceChannel.id,
-                    guildId: voiceChannel.guild.id,
-                    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-                });
+        try {
+            // Search for songs
+            const searchQuery = message.content.split(" ").slice(1).join(" ");
+            const searchRes = await client.player.search(searchQuery)
 
-                play(connection, song);
-            } catch (error) {
-                console.log(error)
-                message.channel.send("An error has occured!");
-                return;
+            // Play the first song in the track   
+            const song = searchRes.tracks[0];
+            console.log(song)
+            message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
+            await queue.addTrack(song);
+
+            if (!queue.playing) {
+                queue.node.play();
             }
-        } else {
-            queue.push(song);
-            message.channel.send(`**${song.title}** has been added to the queue!`);
+        } catch (e) {
+            message.channel.send("No songs found!");
             return;
         }
-
 	},
 };

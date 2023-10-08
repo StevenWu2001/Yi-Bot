@@ -98,7 +98,7 @@ module.exports = {
     // show lol match #name
     name: 'lol',
     description: 'A show command',
-    async execute(message, args, interaction) {
+    async execute(message, args, interaction, client) {
         console.log(message)
         console.log(args)
         var split;

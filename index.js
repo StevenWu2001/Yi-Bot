@@ -3,8 +3,12 @@ require("dotenv").config();
 // Initialize Setups
 const fs = require('fs');
 const Discord = require('discord.js');
-const { Client, GatewayIntentBits, Partials, Events, ActivityType  } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Events, ActivityType} = require('discord.js');
 const {prefix} = require('./config.json');
+const { Player } = require('discord-player')
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const client = new Client({
     intents: [
@@ -12,6 +16,7 @@ const client = new Client({
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildVoiceStates
     ],
     partials: [Partials.Channel, Partials.Message],
   });
@@ -23,6 +28,8 @@ client
 }
 )
 client.login(process.env.BOT_TOKEN);
+
+client.player = new Player(client)
 
 // Command Handler
 client.commands = new Discord.Collection();
@@ -47,7 +54,7 @@ client.on(Events.MessageCreate, message => {
     }
 
     try {
-        client.commands.get(first).execute(message, args);
+        client.commands.get(first).execute(message, args, null, client);
     } catch (error) {
         console.log(error.message)
         message.reply("This command cannot be executed!");
@@ -65,7 +72,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
         try {
             await interaction.reply({content: "Here it is!"})
-            client.commands.get("lol").execute(choices, "__match__", interaction);
+            client.commands.get("lol").execute(choices, "__match__", interaction, client);
         } catch (error) {
             console.log(error.message)
             message.reply("This command cannot be executed!");
