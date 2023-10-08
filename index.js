@@ -4,6 +4,7 @@ require("dotenv").config();
 const fs = require('fs');
 const Discord = require('discord.js');
 const { Client, GatewayIntentBits, Partials, Events, ActivityType} = require('discord.js');
+const { VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
 const {prefix} = require('./config.json');
 const { Player } = require('discord-player')
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
@@ -29,7 +30,11 @@ client
 )
 client.login(process.env.BOT_TOKEN);
 
-client.player = new Player(client)
+client.player = new Player(client);
+client.player.on(AudioPlayerStatus.Idle, () => {
+    setTimeout(() => {
+    }, 15000);
+  })
 
 // Command Handler
 client.commands = new Discord.Collection();
