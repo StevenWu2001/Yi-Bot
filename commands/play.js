@@ -30,10 +30,10 @@ module.exports = {
             await queue.addTrack(song);
 
             if (!queue.playing) {
-                queue.node.play();
+                await queue.node.play();
             }
 
-            message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
+            await message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
         } catch (e) {
             message.channel.send("No songs found!");
             return;
