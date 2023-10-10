@@ -32,14 +32,10 @@ Afterwards, you can select a particular match from the dropdown menu to show the
 <img src="https://github.com/StevenWu2001/Yi-Bot/blob/main/img/demo/match2-new.png" width = "300"> <br/><br/>
 ``` !lol mastery #playerName ``` <br/>
 Displays the top 10 highest mastery points champions of the given summoner (In descending order). <br/><br/>
-<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/mastery1.png" width = "300"> <br/><br/>
+<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/mastery1-new.png" width = "300"> <br/><br/>
 ``` !lol freerotation ``` <br/>
 Displays the current week's free rotation champions, including free rotations for players under level 10 <br/><br/>
-<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
 
-``` !lol freerotation ``` <br/>
-Displays the current week's free rotation champions, including free rotations for players under level 10 <br/><br/>
-<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
 
 ## Music Commands
 ``` !play LINKS / KEY_WORDS``` <br/>
