@@ -23,12 +23,13 @@ node index.js
 ## League of Legends Commands
 ``` !lol rank #playerName ``` <br/>
 Displays the current ranked status of the given summoner (ranked solo/duo, and flex). <br/><br/>
-<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank1.png" width = "300">
-<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank2.png" width = "306"> <br/><br/>
+<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank1-new.png" width = "300">
+<img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/showRank2-new.png" width = "306"> <br/><br/>
 ``` !lol match SUMMONER_NAME NUMBER_OF_MATCHES (optional, default 5, max 20) ``` <br/>
 Displays the recent match history (up to 20) <br/><br/>
-<img src="https://github.com/StevenWu2001/Yi-Bot/blob/main/img/demo/match1.png" width = "300"> <br/><br/>
+<img src="https://github.com/StevenWu2001/Yi-Bot/blob/main/img/demo/match1-new.png" width = "300"> <br/><br/>
 Afterwards, you can select a particular match from the dropdown menu to show the match details <br/><br/>
+<img src="https://github.com/StevenWu2001/Yi-Bot/blob/main/img/demo/match2-new.png" width = "300"> <br/><br/>
 ``` !lol mastery #playerName ``` <br/>
 Displays the top 10 highest mastery points champions of the given summoner (In descending order). <br/><br/>
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/mastery1.png" width = "300"> <br/><br/>
