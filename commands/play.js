@@ -25,7 +25,7 @@ module.exports = {
              });
         
         // Repeat current track
-        queue.setRepeatMode(QueueRepeatMode.TRACK);
+        queue.setRepeatMode(QueueRepeatMode.QUEUE);
 
         if(!queue.connection) {
             await queue.connect(voiceChannel);
@@ -38,14 +38,13 @@ module.exports = {
 
             // Play the first song in the track   
             const song = searchRes.tracks[0];
-            console.log(song)
             await queue.addTrack(song);
-
-            if (!queue.playing) {
+            if (!queue.isPlaying()) {
+                message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`);
                 await queue.node.play();
+            } else {
+                await message.channel.send(`${message.author} Added to the queue: **${song.description} (${song.duration})**`)
             }
-
-            await message.channel.send(`${message.author} Now Playing: **${song.description} (${song.duration})**`)
         } catch (e) {
             message.channel.send("No songs found!");
             return;

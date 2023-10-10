@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
+
 module.exports = {
 	name: 'quit',
 	description: 'Disconnect the bot from a voice channel',
