@@ -41,4 +41,14 @@ Displays the current week's free rotation champions, including free rotations fo
 <img src="https://github.com/StevenWu2001/Discord-Bot-for-LOL/blob/main/img/demo/freerotation1.png" width = "300">
 
 ## Music Commands
+``` !play LINKS / KEY_WORDS``` <br/>
+You can provide the song name, or a link (YouTube, Spotify, etc.), then the bot will join your voice channel and play the song. If there is already a song playing, it will be added to the queue. <br/><br/>
 
+``` !skip ``` <br/>
+Skips the current song in the queue. <br/><br/>
+
+``` !queue ``` <br/>
+Shows the current list of songs in the queue. <br/><br/>
+
+``` !quit ``` <br/>
+Disconnects the bot from the current voice channel. <br/><br/>
