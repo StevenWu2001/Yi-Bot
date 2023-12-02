@@ -1,9 +1,11 @@
-const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/';
-const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/';
-const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/';
+const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/'
+const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/'
+const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/'
 const freeRotationLink = 'https://na1.api.riotgames.com/lol/platform/v3/champion-rotations'
 const matchHistoryLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/'
 const matchLookupLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/'
+const accountByRiotIDLink = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/'
+const accountByPuuidLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/';
 
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOT_KEY;
@@ -106,6 +108,7 @@ module.exports = {
         var encryptedID = '';          // Summoner ID
         var accountID = '';
         var summonerLevel = '';
+        var tagLine = '';
         var puuid = '';
         var iconID = '';
         var numOfMatch = 5;
@@ -122,24 +125,35 @@ module.exports = {
             const IDResponse = await fetch('http://ddragon.leagueoflegends.com/cdn/11.11.1/data/en_US/champion.json')
             IDTable = await IDResponse.json();
             
-
             for (var i = 2; i < split.length; i++) {
                 summonerName += split[i] + '%20';
             }
             summonerName = utf8.encode(summonerName);
-            const link = summonerSearchLink + summonerName + '?' + riotKey;
+            temp = summonerName.split('#');
+            if (temp.length > 1) {
+                summonerName = temp[0];
+                tagLine = temp[1].replace('%20', '');
+            } else {
+                tagLine = 'na1';
+            }
+            console.log(summonerName, tagLine);
+            const link = accountByRiotIDLink + summonerName + '/' + tagLine + '?' + riotKey;
             const response = await fetch(link);
-            let summonerData = await response.json();
-            if (summonerData.hasOwnProperty('status') && summonerData.status.status_code == 404) {
+            let riotIDResponse = await response.json();
+            if (riotIDResponse.hasOwnProperty('status') && riotIDResponse.status.status_code == 404) {
                 message.channel.send("This summoner name cannot be found!");
                 return;
             }
+
+            puuid = riotIDResponse.puuid
+            const link2 = accountByPuuidLink + puuid + '?' + riotKey;
+            const response2 = await fetch(link2);
+            let summonerData = await response2.json();
 
             encryptedID = summonerData.id;
             summonerName = summonerData.name;
             summonerLevel = summonerData.summonerLevel;
             accountID = summonerData.accountId;
-            puuid = summonerData.puuid
             iconID = summonerData.profileIconId;
         } else {
             split = [" ", args]
@@ -219,7 +233,7 @@ module.exports = {
                 var WRData = 'Wins: `' + win + '`  Losses: `' + lose + '`  Winrate: `' + winRate + '%`';
 
                 rankEmbed.setColor('#0099ff');
-                rankEmbed.setTitle(summonerName);
+                rankEmbed.setTitle(summonerName + "#" + tagLine);
                 rankEmbed.setDescription('Summoner Level: `' + summonerLevel + '`');
                 rankEmbed.addFields(
                     { name: queueType + ': ' + rankTier, value: WRData },
@@ -513,7 +527,7 @@ module.exports = {
             var avgKda = Math.round(((totalKills + totalAssists) / totalDeaths) * 100) / 100;
             var winrate = Math.round(totalWins / (totalWins + totalLosses) * 100) / 100;
             matchEmbed.setThumbnail('http://ddragon.leagueoflegends.com/cdn/13.1.1/img/profileicon/' + iconID + '.png');
-            matchEmbed.setTitle('Recent ' + (totalWins + totalLosses) + ' Match(es) for ```' + summonerName + '```');
+            matchEmbed.setTitle('Recent ' + (totalWins + totalLosses) + ' Match(es) for ```' + summonerName + '#' + tagLine + '```');
             matchEmbed.setDescription('Average KDA: `' + avgKda + '` Winrate: `' + winrate + '`')
             
             // Send to chat

@@ -7,7 +7,7 @@ module.exports = {
 	name: 'guide',
 	description: 'The help command',
 	execute(message, args) {
-        var lolCmd = "1: Champion Mastery :bulb:\n `!lol mastery SUMMONER_NAME`\n\n";
+        var lolCmd = "1: Champion Mastery :bulb:\n `!lol mastery SUMMONER_NAME TAG_LINE (optional, na1 by default)`\n\n";
         lolCmd += "2: Rank Info :brain:\n `!lol rank SUMMONER_NAME`\n\n";
         lolCmd += "3: Weekly Free Rotation :free:\n `!lol freerotation`\n\n";
         lolCmd += "4: Recent Match History :watch:\n `!lol match SUMMONER_NAME NUMBER_OF_MATCHES (optional, default 5, max 20)`"
