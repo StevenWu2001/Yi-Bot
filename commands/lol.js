@@ -1,5 +1,6 @@
+// API links
 const summonerSearchLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/'
-const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/'
+const masterySearchLink = 'https://na1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/'
 const accountInfoLink = 'https://na1.api.riotgames.com/lol/league/v4/entries/by-summoner/'
 const freeRotationLink = 'https://na1.api.riotgames.com/lol/platform/v3/champion-rotations'
 const matchHistoryLink = 'https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/'
@@ -7,12 +8,12 @@ const matchLookupLink = 'https://americas.api.riotgames.com/lol/match/v5/matches
 const accountByRiotIDLink = 'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/'
 const accountByPuuidLink = 'https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/';
 
+// Setup
 const utf8 = require('utf8');
 const riotKey = 'api_key=' + process.env.RIOT_KEY;
-const { DiscordAPIError, ActionRowBuilder, StringSelectMenuBuilder} = require("discord.js");
-//const fetch = require("node-fetch");
+const { DiscordAPIError, ActionRowBuilder, StringSelectMenuBuilder, Client, GatewayIntentBits, Partials } = require("discord.js");
 const Discord = require('discord.js');
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+//const fetch = require("node-fetch");
 
 // Initialize Client
 const client = new Client({
@@ -24,7 +25,7 @@ const client = new Client({
     ],
     partials: [Partials.Channel, Partials.Message],
   });
-var emojiList = []
+var emojiList = [];
 client.login(process.env.BOT_TOKEN);
 
 // Ranked Emblem Conversion
@@ -52,7 +53,7 @@ const rankedConvert = {
     "MASTER": 7,
     "GRANDMASTER": 8,
     "CHALLENGER": 9
-}
+};
 
 const numsToRank = {
     0: "IRON",
@@ -65,7 +66,7 @@ const numsToRank = {
     7: "MASTER",
     8: "GRANDMASTER",
     9: "CHALLENGER"
-}
+};
 
 // Convert from queue ID to match type
 const queueIDConvert = {
@@ -80,7 +81,7 @@ const queueIDConvert = {
     900: "URF",
     1010: "URF",
     1900: "URF"
-}
+};
 
 const positionConvert = {
     'TOP': 'Top',
@@ -88,21 +89,15 @@ const positionConvert = {
     'JUNGLE': 'Jungle',
     'BOTTOM': 'Bot',
     'SUPPORT': 'Sup'
-}
-
-inUse = false;
+};
 
 // Command Process
 module.exports = {
-    // show lol rank #name
-    // show lol mastery #name
-    // show lol freerotation
-    // show lol match #name
     name: 'lol',
-    description: 'A show command',
+    description: 'The League of Legends command that handles mastery, match history, summoner status, etc.',
     async execute(message, args, interaction, client) {
-        console.log(message)
-        console.log(args)
+        console.log(message);
+        console.log(args);
         var split;
         var summonerName = '';
         var encryptedID = '';          // Summoner ID
@@ -136,7 +131,9 @@ module.exports = {
             } else {
                 tagLine = 'na1';
             }
+
             console.log(summonerName, tagLine);
+
             const link = accountByRiotIDLink + summonerName + '/' + tagLine + '?' + riotKey;
             const response = await fetch(link);
             let riotIDResponse = await response.json();
@@ -163,7 +160,7 @@ module.exports = {
         if (split[1] == 'mastery') {
             var masteries = [];
             var names = [];
-            const masteryLink = masterySearchLink + encryptedID + '?' + riotKey;
+            const masteryLink = masterySearchLink + puuid + '?' + riotKey;
             const masteryResponse = await fetch(masteryLink);
             let masteryData = await masteryResponse.json();
 
@@ -175,11 +172,12 @@ module.exports = {
                 var champName = '';
                 var m = '';
                 var n = '';
+                var champIcon = '<:pic' + id + ':' + client.emojis.cache.find(emoji => emoji.name === "pic" + id) + '>';
                 for (const key in IDTable.data) {
                     if (IDTable.data[key].key == id) {
                         champName = IDTable.data[key].id;
                         n = champName;
-                        m = 'Mastery Level: ' + level + ',     Mastery Points: ' + points;
+                        m = champIcon + 'Mastery ' + level + ',     Mastery Points: ' + points;
                         masteries.push(m);
                         names.push(n);
                     }
@@ -326,7 +324,7 @@ module.exports = {
             for (const id in freeChamps) {
                 for (const key in IDTable.data) {
                     if (IDTable.data[key].key == freeChamps[id]) {
-                        freeChampsStr += i++ + ': ' + IDTable.data[key].id + '\n';
+                        freeChampsStr += i++ + ': ' + champIcon + IDTable.data[key].id + '\n';
                     }
                 }
             }
@@ -755,7 +753,5 @@ module.exports = {
         } else {
             message.channel.send("The given parameters are invalid. Use !guide for more information.");
         }
-        
-        inUse = false;
     },
 };
