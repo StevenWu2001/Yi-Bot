@@ -5,11 +5,13 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const { Client, GatewayIntentBits, Partials, Events, ActivityType, REST, Routes} = require('discord.js');
 const { VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
-const {prefix} = require('./config.json');
+//const {prefix} = require('./config.json');
 const { Player } = require('discord-player')
 //const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 //const ffmpeg = require('fluent-ffmpeg');
 //ffmpeg.setFfmpegPath(ffmpegPath);
+
+const prefix = '/';
 
 const client = new Client({
     intents: [
@@ -52,31 +54,50 @@ const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
+    if ('data' in command && 'execute' in command) {
+        client.commands.set(command.data.name, command);
+    }
 }
 
 // Execute Commands
-client.on(Events.MessageCreate, message => {
-    if (!message.content.startsWith(prefix) || message.author.bot) {
-        return;
-    }
-    const args = message.content.slice(prefix.length).trim().split('/ +/');
-    const command = args.shift().toLowerCase();
-    const first = command.split(' ')[0];
-    if (!client.commands.has(first)) {
-        return;
-    }
+// client.on(Events.MessageCreate, message => {
+//     if (!message.content.startsWith(prefix) || message.author.bot) {
+//         return;
+//     }
+//     const args = message.content.slice(prefix.length).trim().split('/ +/');
+//     const command = args.shift().toLowerCase();
+//     const first = command.split(' ')[0];
+//     if (!client.commands.has(first)) {
+//         return;
+//     }
 
-    try {
-        client.commands.get(first).execute(message, args, null, client);
-    } catch (error) {
-        console.log(error.message)
-        message.reply("This command cannot be executed!");
-    }
-});
+//     try {
+//         client.commands.get(first).execute(message, args, null, client);
+//     } catch (error) {
+//         console.log(error.message)
+//         message.reply("This command cannot be executed!");
+//     }
+// });
 
 client.on(Events.InteractionCreate, async interaction => {
-    if (!interaction.isStringSelectMenu()) return;
+    //if (!interaction.isStringSelectMenu()) return;
+    const command = interaction.client.commands.get(interaction.commandName);
+    
+    if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+    try {
+		await command.execute(interaction, client);
+	} catch (error) {
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		}
+	}
 
     if (interaction.customId === "Match Dropdown") {
         let choices = "";

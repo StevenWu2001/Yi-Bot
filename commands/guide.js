@@ -4,9 +4,10 @@ const { ApplicationCommandType, ApplicationCommandOptionType, SlashCommandBuilde
 const dot = ":diamond_shape_with_a_dot_inside:";
 
 module.exports = {
-	name: 'guide',
-	description: 'A command that returns a list of available commands.',
-	async execute(message, args) {
+    data: new SlashCommandBuilder()
+        .setName('guide')
+        .setDescription('A list of all available commands for the bot.'),
+	async execute(interaction, args) {
         var lolCmd = "Note: With the addition of RIOT ID, all SUMMONER_NAME must be followed by a tag line unique to your account. If you don't provide one" +
             " the default tag line is `#na1`\n\n";
         lolCmd += "1: Champion Mastery :bulb:\n `!lol mastery SUMMONER_NAME`\n\n";
@@ -31,6 +32,6 @@ module.exports = {
             //{name : dot + " Apex Legends", value : apex + "\n"},
             {name : dot + ' Guide :hammer_and_wrench:', value : '`!guide`'},
         );
-        message.channel.send({ embeds: [helpEmbed] });
+        await interaction.reply({ embeds: [helpEmbed] });
 	},
 };

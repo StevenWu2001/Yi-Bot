@@ -1,21 +1,23 @@
 const Discord = require('discord.js');
+const {SlashCommandBuilder} = require("discord.js")
 
 module.exports = {
-	name: 'queue',
-	description: 'Show the the current playing queue',
-	execute(message, args, interaction, client) {
-        const voiceChannel = message.member.voice.channel;
+    data: new SlashCommandBuilder()
+        .setName('queue')
+        .setDescription('Shows the current playlist.'),
+	execute(interaction, client) {
+        const voiceChannel = interaction.member.voice.channel;
 
-        // Check is use is in the vc
+        // Check is use is in the vcs
         if (!voiceChannel) {
-            message.channel.send(`You must be in a voice channel!`);
+            interaction.reply(`You must be in a voice channel!`);
             return;
         }
 
         // Get queue from the vc
-        const queue = client.player.nodes.get(message.guild);
+        const queue = client.player.nodes.get(interaction.guild);
         if (!queue) {
-            message.channel.send(`The bot is not in a voice channel!`);
+            interaction.reply(`The bot is not in a voice channel!`);
             return;
         }
 
@@ -37,9 +39,9 @@ module.exports = {
                 }
             }
 
-            message.channel.send(queueStr);
+            interaction.reply(queueStr);
         } else {
-            message.channel.send(`Nothing is being played right now!`);
+            interaction.reply(`Nothing is being played right now!`);
         }
 	},
 };

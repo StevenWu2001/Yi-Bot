@@ -1,18 +1,20 @@
 const Discord = require('discord.js');
+const {SlashCommandBuilder} = require("discord.js")
 
 module.exports = {
-	name: 'quit',
-	description: 'Disconnect the bot from a voice channel',
-	execute(message, args, interaction, client) {
-        const queue = client.player.nodes.get(message.guild);
+    data: new SlashCommandBuilder()
+        .setName('quit')
+        .setDescription('Disconnects the bot from the current voice channel.'),
+	execute(interaction, client) {
+        const queue = client.player.nodes.get(interaction.guild);
         if (queue) {
             if (queue.connection) {
-                message.channel.send(`Disconnecting...`);
+                interaction.reply(`Disconnecting...`);
                 queue.delete();
                 return;
             }
         } else {
-            message.channel.send(`I'm not in a voice channel right now!`);
+            interaction.reply(`I'm not in a voice channel right now!`);
             return;
         }
 	},

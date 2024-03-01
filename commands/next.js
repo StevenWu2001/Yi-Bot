@@ -1,21 +1,23 @@
 const Discord = require('discord.js');
+const {SlashCommandBuilder} = require("discord.js")
 
 module.exports = {
-	name: 'next',
-	description: 'Skip the current song and move to the next one',
-	async execute(message, args, interaction, client) {
-        const voiceChannel = message.member.voice.channel;
+    data: new SlashCommandBuilder()
+        .setName('next')
+        .setDescription('Skips the current song.'),
+	async execute(interaction, client) {
+        const voiceChannel = interaction.member.voice.channel;
 
         // Check is use is in the vc
         if (!voiceChannel) {
-            message.channel.send(`You must be in a voice channel!`);
+            interaction.reply(`You must be in a voice channel!`);
             return;
         }
 
         // Get queue from the vc
-        const queue = client.player.nodes.get(message.guild);
+        const queue = client.player.nodes.get(interaction.guild);
         if (!queue) {
-            message.channel.send(`The bot is not in a voice channel!`);
+            interaction.reply(`The bot is not in a voice channel!`);
             return;
         }
 
@@ -23,14 +25,14 @@ module.exports = {
         if (queue.isPlaying()) {
             await queue.node.remove();
             if (queue.tracks.data.length != 0) {
-                message.channel.send(`${message.author} Skipping the current song`);
+                interaction.reply(`${interaction.user} Skipping the current song`);
                 await queue.node.play();
             } else {
-                message.channel.send(`${message.author} This is the last song in the playlist!`);
+                interaction.reply(`${interaction.user} This is the last song in the playlist!`);
             }
             
         } else {
-            message.channel.send(`Nothing is being played right now!`);
+            interaction.reply(`Nothing is being played right now!`);
         }
 	},
 };
