@@ -23,7 +23,12 @@ module.exports = {
 
         // If something is playing, we can pull the playlist
         if (queue.isPlaying()) {
-            queueStr = "**The Current Playlist**\n";
+            let totalSongs = queue.currentTrack ? 1 : 0;
+            if (queue.tracks.data) {
+                totalSongs += queue.tracks.data.length;
+            }
+
+            queueStr = "**The Current Playlist **" + `(${totalSongs} songs total)` + "\n";
 
             // Current Song
             if (queue.currentTrack) {
@@ -39,7 +44,12 @@ module.exports = {
                 }
             }
 
-            interaction.reply(queueStr);
+            // Checks if output exceeds 2000 char limit
+            if (queueStr.length > 2000) {
+                queueStr = queueStr.substring(0, 1970) + '..........';
+            }
+
+            interaction.reply(queueStr);    
         } else {
             interaction.reply(`Nothing is being played right now!`);
         }

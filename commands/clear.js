@@ -3,12 +3,11 @@ const {SlashCommandBuilder} = require("discord.js")
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('next')
-        .setDescription('Skips the current song.'),
+        .setName('clear')
+        .setDescription('Clears the playing queue (removes all songs).'),
 	async execute(interaction, client) {
         const voiceChannel = interaction.member.voice.channel;
-
-        // Check is use is in the vc
+        // Check if user is in the vc
         if (!voiceChannel) {
             interaction.reply(`You must be in a voice channel!`);
             return;
@@ -23,14 +22,10 @@ module.exports = {
 
         // If something is playing, we can skip the current song
         if (queue.isPlaying()) {
-            await queue.node.remove();
-            if (queue.tracks.data.length != 0) {
-                interaction.reply(`${interaction.user} Current song skipped, now playing **${queue.tracks.data[0].description} (${queue.tracks.data[0].duration})**`);
-                await queue.node.play();
-            } else {
-                interaction.reply(`${interaction.user} This is the last song in the playlist!`);
-            }
-            
+            queue.setRepeatMode(0); // Disables auto repeat
+            queue.tracks.clear(); // Clears the queue
+            queue.node.skip(); // Skips the current song
+            interaction.reply(`${interaction.user} Queue cleared!`);          
         } else {
             interaction.reply(`Nothing is being played right now!`);
         }

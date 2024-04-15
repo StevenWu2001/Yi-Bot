@@ -37,28 +37,40 @@ module.exports = {
              });
         
         // Repeat current track
-        queue.setRepeatMode(QueueRepeatMode.QUEUE);
+        queue.setRepeatMode(2);
 
         if(!queue.connection) {
             await queue.connect(voiceChannel);
         }
 
+        // Search and play songs
         try {
-            // Search for songs
-            //const searchQuery = message.content.split(" ").slice(1).join(" ");
             const searchRes = await client.player.search(searchQuery)
-            console.log(searchRes.queryType);
-
-            // Play the first song in the track  
-            const song = searchRes.tracks[0];
-            await queue.addTrack(song);
-            if (!queue.isPlaying()) {
-                interaction.reply(`${interaction.user} Now Playing: **${song.description} (${song.duration})**`);
-                await queue.node.play();
+            
+            // Check if the search result is a YouTube playlist
+            if (searchRes.queryType == 'youtubePlaylist') {
+                for (let i = 0; i < searchRes.tracks.length; i++) {
+                    await queue.addTrack(searchRes.tracks[i]);
+                }
+                interaction.reply(`${interaction.user} Playlist **${searchRes.playlist.description}** with **${searchRes.tracks.length}** songs added.`);
+                if (!queue.isPlaying()) {
+                    await queue.node.play();
+                }
             } else {
-                await interaction.reply(`${interaction.user} Added to the queue: **${song.description} (${song.duration})**`)
+                // Add the first song in the track to the queue
+                const song = searchRes.tracks[0];
+                await queue.addTrack(song);
+
+                // Play the song
+                if (!queue.isPlaying()) {
+                    interaction.reply(`${interaction.user} Now Playing: **${searchRes.tracks[0].description} (${searchRes.tracks[0].duration})**`);
+                    await queue.node.play();
+                } else {
+                    await interaction.reply(`${interaction.user} Added to the queue: **${searchRes.tracks[0].description} (${searchRes.tracks[0].duration})**`)
+                }
             }
         } catch (e) {
+            console.log(e)
             interaction.reply("No songs found!");
             return;
         }
