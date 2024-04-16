@@ -10,7 +10,7 @@ module.exports = {
         if (queue) {
             if (queue.connection) {
                 await interaction.reply(`Disconnecting...`);
-                queue.delete();
+                await queue.delete();
                 return;
             }
         } else {

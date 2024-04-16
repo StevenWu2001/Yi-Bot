@@ -15,7 +15,6 @@ module.exports = {
                 .setDescription('Searches for a song with name or link.')
                 .setRequired(true)),
                 
-
 	async execute(interaction, client) {
         await interaction.deferReply();
 
