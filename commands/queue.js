@@ -28,7 +28,7 @@ module.exports = {
                 totalSongs += queue.tracks.data.length;
             }
 
-            queueStr = "**The Current Playlist **" + `(${totalSongs} songs total)` + "\n";
+            queueStr = "**The Current Playlist **" + `(${totalSongs} Song(s) Total)` + "\n";
 
             // Current Song
             if (queue.currentTrack) {

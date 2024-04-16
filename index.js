@@ -93,9 +93,9 @@ client.on(Events.InteractionCreate, async interaction => {
 	} catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
-			await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.editReply({ content: 'There was an error while executing this command! If you are using **/play**, some songs cannot be played due to issues like format, or age restriction.', ephemeral: true });
 		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.reply({ content: 'There was an error while executing this command! If you are using **/play**, some songs cannot be played due to issues like format, or age restriction.', ephemeral: true });
 		}
 	}
 
