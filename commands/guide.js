@@ -17,11 +17,11 @@ module.exports = {
 
         //var apex = "1: Player Stats :bulb:\n`!apex player ORIGIN_USERNAME`\n\n";
 
-        var music = "1: Play Music (or add a new song to the playlist) :musical_note:\n `/play SONG_NAME / LINK`\n\n";
-        music += "2: Show the Current Playlist :musical_note:\n `/queue`\n\n";
-        music += "3: Skip the Currente Song :musical_note:\n `/next`\n\n";
+        var music = "1: Plays Music (or add a new song to the playlist) :musical_note:\n `/play SONG_NAME / LINK`\n\n";
+        music += "2: Shows the Current Playlist :musical_note:\n `/queue`\n\n";
+        music += "3: Skips the Current Song :musical_note:\n `/next`\n\n";
         music += "4: Clears all the songs in the current queue :musical_note:\n `/clear`\n\n";
-        music += "5: Disconnecting the Bot :musical_note:\n `/quit`\n\n";
+        music += "5: Disconnects the Bot :musical_note:\n `/quit`\n\n";
 
 		const helpEmbed = new Discord.EmbedBuilder();
         helpEmbed.setColor('#0099ff');

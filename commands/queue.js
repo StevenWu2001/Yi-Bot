@@ -5,19 +5,19 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('queue')
         .setDescription('Shows the current playlist.'),
-	execute(interaction, client) {
+	async execute(interaction, client) {
         const voiceChannel = interaction.member.voice.channel;
 
         // Check is use is in the vcs
         if (!voiceChannel) {
-            interaction.reply(`You must be in a voice channel!`);
+            await interaction.reply(`You must be in a voice channel!`);
             return;
         }
 
         // Get queue from the vc
         const queue = client.player.nodes.get(interaction.guild);
         if (!queue) {
-            interaction.reply(`The bot is not in a voice channel!`);
+            await interaction.reply(`The bot is not in a voice channel!`);
             return;
         }
 
@@ -49,9 +49,9 @@ module.exports = {
                 queueStr = queueStr.substring(0, 1970) + '..........';
             }
 
-            interaction.reply(queueStr);    
+            await interaction.reply(queueStr);    
         } else {
-            interaction.reply(`Nothing is being played right now!`);
+            await interaction.reply(`Nothing is being played right now!`);
         }
 	},
 };

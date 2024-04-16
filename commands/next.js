@@ -8,16 +8,16 @@ module.exports = {
 	async execute(interaction, client) {
         const voiceChannel = interaction.member.voice.channel;
 
-        // Check is use is in the vc
+        // Check if user is in the vc
         if (!voiceChannel) {
-            interaction.reply(`You must be in a voice channel!`);
+            await interaction.reply(`You must be in a voice channel!`);
             return;
         }
 
         // Get queue from the vc
         const queue = client.player.nodes.get(interaction.guild);
         if (!queue) {
-            interaction.reply(`The bot is not in a voice channel!`);
+            await interaction.reply(`The bot is not in a voice channel!`);
             return;
         }
 
@@ -25,14 +25,14 @@ module.exports = {
         if (queue.isPlaying()) {
             await queue.node.remove();
             if (queue.tracks.data.length != 0) {
-                interaction.reply(`${interaction.user} Current song skipped, now playing **${queue.tracks.data[0].description} (${queue.tracks.data[0].duration})**`);
+                await interaction.reply(`${interaction.user} Current song skipped, now playing **${queue.tracks.data[0].description} (${queue.tracks.data[0].duration})**`);
                 await queue.node.play();
             } else {
-                interaction.reply(`${interaction.user} This is the last song in the playlist!`);
+                await interaction.reply(`${interaction.user} This is the last song in the playlist!`);
             }
             
         } else {
-            interaction.reply(`Nothing is being played right now!`);
+            await interaction.reply(`Nothing is being played right now!`);
         }
 	},
 };
