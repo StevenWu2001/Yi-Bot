@@ -36,6 +36,8 @@ module.exports = {
                leaveOnEnd: false,
                leaveOnEndCooldown: 300000,
              });
+            
+        queue.setRepeatMode(2); // Repeat
 
         if(!queue.connection) {
             await queue.connect(voiceChannel);

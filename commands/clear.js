@@ -22,9 +22,11 @@ module.exports = {
 
         // If something is playing, we can skip the current song
         if (queue.isPlaying()) {
+            queue.setRepeatMode(0);
             await queue.tracks.clear(); // Clears the queue
             await queue.node.skip(); // Skips the current song
-            await interaction.reply(`${interaction.user} Queue cleared!`);          
+            await interaction.reply(`${interaction.user} Queue cleared!`);     
+            queue.setRepeatMode(2);     
         } else {
             await interaction.reply(`Nothing is being played right now!`);
         }
