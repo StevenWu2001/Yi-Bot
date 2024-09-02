@@ -1,12 +1,14 @@
 const Discord = require('discord.js');
 const {SlashCommandBuilder} = require("discord.js")
+const { useMainPlayer } = require('discord-player');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quit')
         .setDescription('Disconnects the bot from the current voice channel.'),
 	async execute(interaction, client) {
-        const queue = client.player.nodes.get(interaction.guild);
+        const player = useMainPlayer();
+        const queue = player.nodes.get(interaction.guild);
         if (queue) {
             if (queue.connection) {
                 await interaction.reply(`Disconnecting...`);

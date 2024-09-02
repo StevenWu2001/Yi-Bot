@@ -10,8 +10,7 @@ const { Player } = require('discord-player')
 //const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 //const ffmpeg = require('fluent-ffmpeg');
 //ffmpeg.setFfmpegPath(ffmpegPath);
-
-const prefix = '/';
+const { prefix } = require('./config.json');
 
 const client = new Client({
     intents: [

@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const {SlashCommandBuilder} = require("discord.js")
+const { useMainPlayer } = require('discord-player');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,8 +15,10 @@ module.exports = {
             return;
         }
 
+        const player = useMainPlayer();
+
         // Get queue from the vc
-        const queue = client.player.nodes.get(interaction.guild);
+        const queue = player.nodes.get(interaction.guild);
         if (!queue) {
             await interaction.reply(`The bot is not in a voice channel!`);
             return;
