@@ -1,4 +1,5 @@
-# Yi Bot for LOL / Music / and more!
+# Many features are currently under development and thus they might now work as expected.
+## Yi Bot for LOL / Music / and more!
 A discord bot for League of Legends lookup, music playing, and more!
 
 Usefull links:
